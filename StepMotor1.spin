@@ -25,9 +25,8 @@ DAT
                         org     0              
 
 '***  Initialize Cog
-entry                   mov     dira,           byDataDirectionReg
+entry                   mov     dira,           #$0F
                         mov     outa,           #$00
-                        wrlong  cnt,            ramlgTaskTime
 
 '***  Prepare timer mainloop
                         mov     lgTime,         cnt
@@ -35,33 +34,75 @@ entry                   mov     dira,           byDataDirectionReg
 
 '***  Main loop
 mainloop                waitcnt lgTime,         TASKTIME
+                        mov     lgStartTime,    cnt
+                                     
                         add     lgScanCounter,  #1
 
-                        xor     outa,           xoMotorStepPuls
-                        add     ramlgPosition,  #1
+'***  get data
+                        rdlong  lgPulsControl   hubPulsControl
+                        rdlong  lgMaxCountM1    hubMaxCountM1
+                        rdlong  lgMaxCountM2    hubMaxCountM2
 
-                        wrlong  lgTime,    ramlgTaskTime
-                        wrlong  lgTime,    ramlgTaskTime
+'***  M1 set direction
+              z         test    lgPulsControl   bit0
+              if_z      andn    outa,           xoDirectionM1    
+              if_nz     or      outa            xoDirectionM1
+                        
+'***  M2 Set direction
+              z         test    lgPulsControl   bit8
+              if_z      andn    outa,           xoDirectionM2     
+              if_nz     or      outa            xoDirectionM2
+
+'***  M1 Step Puls Control
+M1            z         test    lgPulsControl   bit1
+              if_z      jmp     #stepM1
+              
+
+
+                        jmp     #M2
+              z         cmp     lgCountM1,      #0
+              if             
+
+
+              z         cmp     lgPulsControl   bit1
+              if_z      and     outa,           xoDirectionM1     
+
+
+ 
+              if_z      or     outa,            xoStepPulsM1
+              if_z      add    lgPositionM1,    #1
+
+
+
+                        
+
+'***  put data
+                        wrlong  lgScanCounter,  ramlgTaskTime
+                        wrlong  ramlgPosition1, ramlgTaskTime
 
                         jmp     #mainloop
 '***  Constants
-TASKTIME                long 5000  '500 usec
+TASKTIME                long 500  '50 usec
 
 '***  Harware settings
-xoMotorDirection        long %0000_0001         'Pin0
-xoMotorStepPuls         long %0000_0010         'Pin1
-byDataDirectionReg      long %0000_0011         '0 = Input, 1 = Output'
+xoDirectionM1           long %0000_0001         'Pin0
+xoStepPulsM1            long %0000_0010         'Pin1
+xoDirectionM2           long %0000_0100         'Pin2
+xoStepPulsM2            long %0000_1000         'Pin3
     
-'***  HUB RAM adressen
-ramlgTaskTime           long $7000
-ramlgPosition           long $7004
-ramlgScanCounter        long $7008                
+'***  global
+hublgTaskTime           long $7000
+hublgPosition           long $7004
+hublgScanCounter        long $7008                
 
+
+ram
 
 '**************************************************************************
 '***  Local var                                                         ***
 '**************************************************************************
 
-'///// Execution control var \\\\\
 lgTime                  res
-lgScanCounter           res        
+lgScanCounter           res
+lgPulsControl           res
+  
