@@ -12,8 +12,9 @@ CON
   PC_BAUD       = 115_200
    
 OBJ
-  tst             :"TestVarFreq"
+  ''tst             :"TestVarFreq"
   pc              :"Parallax Serial Terminal"
+  stepm1            :"StepMotor_SPIN"
 
 
 VAR
@@ -23,19 +24,19 @@ VAR
  
 PUB Start | temp
 
-  tst.start(0)               
+  ''tst.start(0)               
   pc.Start(PC_BAUD)                    'Get PC I/O set up.
-
+  stepm1.Construct
  
   repeat
-    waitcnt(cnt + clkfreq/2) 
-    pc.home
-    pc.Str(string(" Motor Position : "))
-    pc.dec(long[$7000])
-    pc.NewLine
-    pc.Str(string(" Motor Status   : "))
-    pc.hex(byte[$7004],2)
-    pc.NewLine
+    waitcnt(cnt + 500000) 
+    ''pc.home
+    ''pc.Str(string(" Motor Position : "))
+    ''pc.dec(long[$7000])
+    ''pc.NewLine
+    ''pc.Str(string(" Motor Status   : "))
+    ''pc.hex(byte[$7004],2)
+    ''pc.NewLine
 
     ''xKeyPressed := pc.CharIn
     ''if xKeyPressed == "?"
