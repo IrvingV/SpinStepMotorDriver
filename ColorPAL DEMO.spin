@@ -13,53 +13,87 @@ CON
    
 OBJ
   ''tst             :"TestVarFreq"
-  pc              :"Parallax Serial Terminal"
+  pc                :"Parallax Serial Terminal"
   stepm1            :"StepMotor_SPIN"
+  stepm2            :"StepMotor_SPIN"
+  stepm3            :"StepMotor_SPIN"
 
 
 VAR
 
   byte xKeyPressed
-  long IoCtrl 
+  ''long IoCtrl 
  
-PUB Start | temp
+PUB Main
 
-  ''tst.start(0)               
-  pc.Start(PC_BAUD)                    'Get PC I/O set up.
-  stepm1.Construct
+  pc.Start(PC_BAUD)               
+  stepm1.Start(0,1)
+  stepm2.Start(2,3)
+  stepm3.Start(4,5)
  
   repeat
-    waitcnt(cnt + 500000) 
-    ''pc.home
-    ''pc.Str(string(" Motor Position : "))
-    ''pc.dec(long[$7000])
-    ''pc.NewLine
-    ''pc.Str(string(" Motor Status   : "))
-    ''pc.hex(byte[$7004],2)
-    ''pc.NewLine
+    waitcnt(cnt + 50000) 
 
-    ''xKeyPressed := pc.CharIn
-    ''if xKeyPressed == "?"
-              
-      '' pc.Clear
-       ''pc.Str(string("=========    Propellor HUB RAM Read and Write    =========="))
-       ''pc.NewLine
-       ''pc.NewLine
-       ''pc.Str(string(" ** Command : [<R><W>][<L><W><B>] [HHHH] [<HHHHHHHH><HHHH><HH>"))
-       ''pc.NewLine
-       ''pc.Str(string(" ** Esc     : Clear command"))
-       ''pc.NewLine
-       ''pc.Str(string(" ** ?       : Help"))
-       ''pc.NewLine
-       ''pc.Str(string("> "))
-    ''if xKeyPressed == 27
-      '' pc.NewLine
-       ''pc.Str(string("SYNTAX ERROR > "))
-''    if xCommandError
-  ''     pc.NewLine
-    ''   pc.Str(string("SYNTAX ERROR > "))
+    xKeyPressed := pc.CharIn
+
+    if xKeyPressed == "?"
+      pc.Str(string("=========    Propellor HUB RAM Read and Write    =========="))
+      pc.NewLine
+
+    if xKeyPressed == "1"
+      pc.Str(string("***   1 pressed M1 forward"))
+      pc.NewLine
+      stepm1.M_SetDirection(false)
+    if xKeyPressed == "q"
+      pc.Str(string("***   q pressed M2 forward"))
+      pc.NewLine
+      stepm2.M_SetDirection(false)
+    if xKeyPressed == "a"
+      pc.Str(string("***   a pressed M3 forward"))
+      pc.NewLine
+      stepm3.M_SetDirection(false)
+
+    if xKeyPressed == "2"
+      pc.Str(string("***   2 pressed M1 backward"))
+      pc.NewLine
+      stepm1.M_SetDirection(true)
+    if xKeyPressed == "w"
+      pc.Str(string("***   w pressed M2 backward"))
+      pc.NewLine
+      stepm2.M_SetDirection(true)
+    if xKeyPressed == "s"
+      pc.Str(string("***   s pressed M3 backward"))
+      pc.NewLine
+      stepm3.M_SetDirection(true)
+
+    if xKeyPressed == "3"
+      if stepm1.M_running
+        pc.Str(string("***   3 pressed M stopping"))
+        stepm1.M_Stop
+      else
+         pc.Str(string("***   3 pressed M starting"))
+         stepm1.M_Run
+      pc.NewLine
+   
+    if xKeyPressed == "4"
+      pc.Str(string("***   4 pressed M1 goes fast"))
+      pc.NewLine
+        stepm1.M_RunFast(true)
+
+    if xKeyPressed == "5"
+      pc.Str(string("***   5 pressed M1 goes slow"))
+      pc.NewLine
+        stepm1.M_RunFast(false)
+
+    if xKeyPressed == "6"
+      pc.Str(string("***   6 pressed M1 execute time : "))
+      pc.dec(stepm1.M_ExecuteTime)
+      pc.NewLine
     
-    
+    if xKeyPressed == "7"
+      pc.Str(string("***   6 pressed M1 actual position : "))
+      pc.dec(stepm1.M_ActualPosition)
+      pc.NewLine
     
       
       
