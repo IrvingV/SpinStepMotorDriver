@@ -20,6 +20,7 @@ CON
 OBJ
 
 VAR
+
   long Time
   long lgActualPos
   long lgStartTime
@@ -34,13 +35,13 @@ VAR
   byte xDirectionBackward
   byte byCogID
  
-PUB Start(M_Dir, StepPuls)
-'************
-byPinDirection                  := M_Dir
-byPinStepPuls                   := StepPuls
+PUB Start(PinDir, PinStep)
+   
+  byPinDirection                  := PinDir
+  byPinStepPuls                   := PinStep
 
-''Stp
-  cognew (Loop,0)
+  ''Stp
+  byCogID := cognew (Loop,0)
 
 PUB Stp
 '******
@@ -59,7 +60,7 @@ PRI Loop
   woPulsCount                   := 0
   
   repeat     
-    waitcnt(10000+cnt)
+    waitcnt(1000000+cnt)
     lgStartTime := cnt
     outa[byPinDirection]        := xDirectionBackward
 
@@ -80,9 +81,6 @@ PRI Loop
       woPulsCount := 0
       
     lgExecuteTime := cnt - lgStartTime
-      
-
-      
          
 
 PUB M_Run
@@ -111,4 +109,9 @@ PUB M_ActualPosition
 
 PUB M_ExecuteTime
   return lgExecuteTime
-      
+
+PUB M_FirstPin
+  return byPinDirection
+
+PUB M_SecondPin
+  return byPinStepPuls    
