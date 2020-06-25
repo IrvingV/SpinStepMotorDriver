@@ -14,10 +14,7 @@ CON
 OBJ
   ''tst             :"TestVarFreq"
   pc                :"Parallax Serial Terminal"
-  stepm1            :"StepMotor_SPIN"
-  ''stepm2            :"StepMotor_SPIN"
-  ''stepm3            :"StepMotor_SPIN"
-
+  stpmtr            :"StepMotor1_4"
 
 VAR
 
@@ -30,20 +27,7 @@ VAR
 PUB Main
 
   pc.Start(PC_BAUD)
-  M1Par[0] := %00000001         'Pin 0 = M1 Direction               
-  M1Par[1] := %00000010         'Pin 1 = M1 StepPuls               
-
-
-
-
-
-
-
-
-
-  stepm1.Start(0,1)
-  ''stepm2.Start(2,3)
-  ''stepm3.Start(4,5)
+  stpmtr.StartM1_M4(0)
  
   repeat
     waitcnt(cnt + 50000) 
@@ -55,65 +39,51 @@ PUB Main
       pc.NewLine
 
     if xKeyPressed == "1"
-      pc.Str(string("***   1 pressed M1 forward"))
-      pc.NewLine
-      stepm1.M_SetDirection(false)
-      ''stepm2.M_SetDirection(false)
+      stpmtr.SetDir(1, false)
     if xKeyPressed == "q"
-      pc.Str(string("***   q pressed M2 forward"))
-      pc.NewLine
-    ''  stepm2.M_SetDirection(false)
+      stpmtr.SetDir(2, false)
     if xKeyPressed == "a"
-      pc.Str(string("***   a pressed M3 forward"))
-      pc.NewLine
-    ''  stepm3.M_SetDirection(false)
+      stpmtr.SetDir(3, false)
 
     if xKeyPressed == "2"
-      pc.Str(string("***   2 pressed M1 backward"))
-      pc.NewLine
-      stepm1.M_SetDirection(true)
-      ''stepm2.M_SetDirection(true)
+      stpmtr.SetDir(1,true)
     if xKeyPressed == "w"
-      pc.Str(string("***   w pressed M2 backward"))
-      pc.NewLine
-    ''  stepm2.M_SetDirection(true)
+      stpmtr.SetDir(2,true)
     if xKeyPressed == "s"
-      pc.Str(string("***   s pressed M3 backward"))
-      pc.NewLine
-    ''  stepm3.M_SetDirection(true)
+       stpmtr.SetDir(3,true)
 
     if xKeyPressed == "3"
-      if stepm1.M_running
+      if stpmtr.Running(1)
         pc.Str(string("***   3 pressed M stopping"))
-        stepm1.M_Stop
-        ''stepm2.M_Stop
+        stpmtr.SetRun(1,false)
+        ''stepm2.SetRun(false)
       else
          pc.Str(string("***   3 pressed M starting"))
-         stepm1.M_Run
-         ''stepm2.M_Run
+         stpmtr.SetRun(1,true)
+         ''stepm2.SetRun(true)
       pc.NewLine
    
     if xKeyPressed == "4"
       pc.Str(string("***   4 pressed M1 goes fast"))
       pc.NewLine
-        stepm1.M_RunFast(true)
-        ''stepm2.M_RunFast(true)
+        stpmtr.SetRunFast(true)
+        ''stepm2.SetRun(true)Fast(true)
 
     if xKeyPressed == "5"
       pc.Str(string("***   5 pressed M1 goes slow"))
       pc.NewLine
-        stepm1.M_RunFast(false)
-        ''stepm2.M_RunFast(false)
+        stpmtr.SetRunFast(false)
+        ''stepm2.SetRun(true)Fast(false)
 
     if xKeyPressed == "6"
       pc.Str(string("***   6 pressed M1 ExecTime, ActPos, first, second : "))
-      pc.dec(stepm1.M_ExecuteTime)
+      pc.dec(stpmtr.M_ExecuteTime)
       pc.Str(string("  "))
-      pc.dec(stepm1.M_ActualPosition)
+      pc.dec(stpmtr.M_ActualPosition)
       pc.Str(string("  "))
-      pc.dec(stepm1.M_FirstPin)
+      pc.dec(stpmtr.M_FirstPin)
       pc.Str(string("  "))
-      pc.dec(stepm1.M_SecondPin)
+      pc.dec(stpmtr.M_SecondPin)
       pc.NewLine
     
     if xKeyPressed == "y"
