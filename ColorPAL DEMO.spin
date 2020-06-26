@@ -44,69 +44,74 @@ PUB Main
       stpmtr.SetDir(2, false)
     if xKeyPressed == "a"
       stpmtr.SetDir(3, false)
+    if xKeyPressed == "z"
+      stpmtr.SetDir(4, false)
 
     if xKeyPressed == "2"
       stpmtr.SetDir(1,true)
     if xKeyPressed == "w"
       stpmtr.SetDir(2,true)
     if xKeyPressed == "s"
-       stpmtr.SetDir(3,true)
+      stpmtr.SetDir(3,true)
+    if xKeyPressed == "x"
+      stpmtr.SetDir(4,true)
 
     if xKeyPressed == "3"
+      pc.Dec(stpmtr.Running(1))
       if stpmtr.Running(1)
-        pc.Str(string("***   3 pressed M stopping"))
-        stpmtr.SetRun(1,false)
-        ''stepm2.SetRun(false)
+        stpmtr.SetSpeedFast(1,false)
+        stpmtr.SetRun(1,true)
       else
-         pc.Str(string("***   3 pressed M starting"))
-         stpmtr.SetRun(1,true)
-         ''stepm2.SetRun(true)
-      pc.NewLine
+        stpmtr.SetRun(1,false)
+    if xKeyPressed == "e"
+      pc.Dec(stpmtr.Running(2))
+      if stpmtr.Running(2)
+        stpmtr.SetSpeedFast(2,false)
+        stpmtr.SetRun(2,true)
+      else
+        stpmtr.SetRun(2,false)
+    if xKeyPressed == "d"
+      pc.Dec(stpmtr.Running(3))
+      if stpmtr.Running(3)
+        stpmtr.SetSpeedFast(3,false)
+        stpmtr.SetRun(3,true)
+      else
+        stpmtr.SetRun(3,false)
+    if xKeyPressed == "c"
+      pc.Dec(stpmtr.Running(4))
+      if stpmtr.Running(4)
+        stpmtr.SetSpeedFast(4,false)
+        stpmtr.SetRun(4,true)
+      else
+        stpmtr.SetRun(4,false)
    
     if xKeyPressed == "4"
-      pc.Str(string("***   4 pressed M1 goes fast"))
-      pc.NewLine
-        stpmtr.SetRunFast(true)
-        ''stepm2.SetRun(true)Fast(true)
-
+        stpmtr.SetSpeedFast(1,true)
+    if xKeyPressed == "r"
+        stpmtr.SetSpeedFast(2,true)
+    if xKeyPressed == "f"
+        stpmtr.SetSpeedFast(3,true)
+    if xKeyPressed == "v"
+        stpmtr.SetSpeedFast(4,true)
+   
     if xKeyPressed == "5"
-      pc.Str(string("***   5 pressed M1 goes slow"))
-      pc.NewLine
-        stpmtr.SetRunFast(false)
-        ''stepm2.SetRun(true)Fast(false)
+        stpmtr.SetSpeedFast(1,false)
+    if xKeyPressed == "t"
+        stpmtr.SetSpeedFast(2,false)
+    if xKeyPressed == "g"
+        stpmtr.SetSpeedFast(3,false)
+    if xKeyPressed == "b"
+        stpmtr.SetSpeedFast(4,false)
 
     if xKeyPressed == "6"
-      pc.Str(string("***   6 pressed M1 ExecTime, ActPos, first, second : "))
-      pc.dec(stpmtr.M_ExecuteTime)
+      pc.Str(string("***   6 pressed M1 ExecTime, ActCount : "))
+      pc.dec(stpmtr.ExecuteTime)
       pc.Str(string("  "))
-      pc.dec(stpmtr.M_ActualPosition)
-      pc.Str(string("  "))
-      pc.dec(stpmtr.M_FirstPin)
-      pc.Str(string("  "))
-      pc.dec(stpmtr.M_SecondPin)
+      pc.dec(stpmtr.ActualCount(1))
+  
       pc.NewLine
     
-    if xKeyPressed == "y"
-      pc.Str(string("***   y pressed M2 ExecTime, ActPos, first, second : "))
-      ''pc.dec(stepm2.M_ExecuteTime)
-      pc.Str(string("  "))
-      ''pc.dec(stepm2.M_ActualPosition)
-      pc.Str(string("  "))
-      ''pc.dec(stepm2.M_FirstPin)
-      pc.Str(string("  "))
-      ''pc.dec(stepm2.M_SecondPin)
-      pc.NewLine
-      
-    if xKeyPressed == "h"
-      pc.Str(string("***   h pressed M3 ExecTime, ActPos, first, second : "))
-      ''pc.dec(stepm3.M_ExecuteTime)
-      pc.Str(string("  "))
-      ''pc.dec(stepm3.M_ActualPosition)
-      pc.Str(string("  "))
-      ''pc.dec(stepm3.M_FirstPin)
-      pc.Str(string("  "))
-      ''pc.dec(stepm3.M_SecondPin)
-      pc.NewLine
+  
       
       'pc.Str(string("0 "))
       'pc.dec(long[$3104])        ' Message Start Received
