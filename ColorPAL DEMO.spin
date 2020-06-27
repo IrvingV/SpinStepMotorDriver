@@ -14,6 +14,7 @@ CON
 OBJ
   ''tst             :"TestVarFreq"
   pc                :"Parallax Serial Terminal"
+  motn              :"Motion"
   stpmtr            :"StepMotor1_4"
 
 VAR
