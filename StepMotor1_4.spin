@@ -49,75 +49,81 @@ PUB Stp
 PUB SetRun(x, Run)
   if Run
     case x
-      1: long[hubCtrlM1_4] := long[hubCtrlM1_4] & !bit1  
-      2: long[hubCtrlM1_4] := long[hubCtrlM1_4] & !bit9
-      3: long[hubCtrlM1_4] := long[hubCtrlM1_4] & !bit17
-      4: long[hubCtrlM1_4] := long[hubCtrlM1_4] & !bit25
+      1: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b1  
+      2: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b9
+      3: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b17
+      4: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b25
   else
     case x
-      1: long[hubCtrlM1_4] := long[hubCtrlM1_4] | bit1  
-      2: long[hubCtrlM1_4] := long[hubCtrlM1_4] | bit9
-      3: long[hubCtrlM1_4] := long[hubCtrlM1_4] | bit17
-      4: long[hubCtrlM1_4] := long[hubCtrlM1_4] | bit25
+      1: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b1  
+      2: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b9
+      3: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b17
+      4: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b25
 
 PUB SetSpeedFast (x, Fast)
   if Fast
     case x
-      1: long[hubMaxCountM1] := 2
-      2: long[hubMaxCountM2] := 2
-      3: long[hubMaxCountM3] := 2
-      4: long[hubMaxCountM4] := 2
+      1: long[hubM1MaxCount] := 2
+      2: long[hubM2MaxCount] := 2
+      3: long[hubM3MaxCount] := 2
+      4: long[hubM4MaxCount] := 2
   else
     case x
-      1: long[hubMaxCountM1] := 4  
-      2: long[hubMaxCountM2] := 4  
-      3: long[hubMaxCountM3] := 4  
-      4: long[hubMaxCountM4] := 4  
+      1: long[hubM1MaxCount] := 4  
+      2: long[hubM2MaxCount] := 4  
+      3: long[hubM3MaxCount] := 4  
+      4: long[hubM4MaxCount] := 4  
 
 PUB SetDir (x, Dir)
   if Dir
     case x
-      1: long[hubCtrlM1_4] := long[hubCtrlM1_4] | bit0  
-      2: long[hubCtrlM1_4] := long[hubCtrlM1_4] | bit8
-      3: long[hubCtrlM1_4] := long[hubCtrlM1_4] | bit16
-      4: long[hubCtrlM1_4] := long[hubCtrlM1_4] | bit24
+      1: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b0  
+      2: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b8
+      3: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b16
+      4: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b24
   else
     case x
-      1: long[hubCtrlM1_4] := long[hubCtrlM1_4] & !bit0  
-      2: long[hubCtrlM1_4] := long[hubCtrlM1_4] & !bit8
-      3: long[hubCtrlM1_4] := long[hubCtrlM1_4] & !bit16
-      4: long[hubCtrlM1_4] := long[hubCtrlM1_4] & !bit24
+      1: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b0  
+      2: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b8
+      3: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b16
+      4: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b24
 
 
 
 PUB M_SetPosition (Pos)
   lgActualPos1 := Pos                               
   
+PUB ExecuteTime
+  return long[hubExecTime]
+
 PUB Running(x)
   case x
-    1: return long[hubStatM1_4] & bit1 == bit1  
-    2: return long[hubStatM1_4] & bit9 == bit9 
-    3: return long[hubStatM1_4] & bit17 == bit17 
-    4: return long[hubStatM1_4] & bit25 == bit25 
+    1: return long[hubM1_4Stat] & b1 == b1  
+    2: return long[hubM1_4Stat] & b9 == b9 
+    3: return long[hubM1_4Stat] & b17 == b17 
+    4: return long[hubM1_4Stat] & b25 == b25 
 
 
 PUB ActualPosition(x)
   case x
-    1: return long[hubActPosM1]
-    2: return long[hubActPosM2]
-    3: return long[hubActPosM3]
-    4: return long[hubActPosM4]
-
-PUB ExecuteTime
-  return long[hubExecTime]
+    1: return long[hubM1ActPos]
+    2: return long[hubM2ActPos]
+    3: return long[hubM3ActPos]
+    4: return long[hubM4ActPos]
 
 PUB ActualCount (x)
   case x
-    1: return long[hubActCountM1]
-    2: return long[hubActCountM2]
-    3: return long[hubActCountM3]
-    4: return long[hubActCountM4]
+    1: return long[hubM1ActCount]
+    2: return long[hubM2ActCount]
+    3: return long[hubM3ActCount]
+    4: return long[hubM4ActCount]
 
+PUB MaxCount (x)
+  case x
+    1: return long[hubM1MaxCount]
+    2: return long[hubM2MaxCount]
+    3: return long[hubM3MaxCount]
+    4: return long[hubM4MaxCount]
 
 DAT
     
@@ -125,8 +131,12 @@ DAT
 Entry                   mov     dira,           #%11111111
                         mov     outa,           #%00000000
 
-                        mov     lgCtrlM1_4,     #0
-                        wrlong  lgCtrlM1_4,     hubCtrlM1_4
+                        mov     lgM1_4Ctrl,     #0
+                        wrlong  lgM1_4Ctrl,     hubM1_4Ctrl
+                        mov     lgM1ActPos,     #0
+                        mov     lgM2ActPos,     #0
+                        mov     lgM3ActPos,     #0
+                        mov     lgM4ActPos,     #0
                         
                         mov     lgTime, cnt
                         add     lgTime, #9
@@ -135,82 +145,83 @@ mainloop                waitcnt lgTime,         lgDelay
 
                         mov     lgStartTime,    cnt
 'Read Parameters
-                        rdlong  lgCtrlM1_4,     hubCtrlM1_4
-                        rdlong  lgMaxCountM1,   hubMaxCountM1
-                        rdlong  lgMaxCountM2,   hubMaxCountM2
-                        rdlong  lgMaxCountM3,   hubMaxCountM3
-                        rdlong  lgMaxCountM4,   hubMaxCountM4
-                        rdlong  lgHomePosM1,    hubHomePosM1
-                        rdlong  lgHomePosM2,    hubHomePosM2
-                        rdlong  lgHomePosM3,    hubHomePosM3
-                        rdlong  lgHomePosM4,    hubHomePosM4
+                        rdlong  lgM1_4Ctrl,     hubM1_4Ctrl
+                        rdlong  lgM1MaxCount,   hubM1MaxCount
+                        rdlong  lgM2MaxCount,   hubM2MaxCount
+                        rdlong  lgM3MaxCount,   hubM3MaxCount
+                        rdlong  lgM4MaxCount,   hubM4MaxCount
+                        rdlong  lgM1HomePos,    hubM1HomePos
+                        rdlong  lgM2HomePos,    hubM2HomePos
+                        rdlong  lgM3HomePos,    hubM3HomePos
+                        rdlong  lgM4HomePos,    hubM4HomePos
 
 'Write motor directions outputs
-                        test    lgCtrlM1_4,     bit0    wz
-                        muxnz   outa,           bit0                        
+                        test    lgM1_4Ctrl,     b0    wz
+                        muxnz   outa,           b0                        
 
-                        test    lgCtrlM1_4,     bit8    wz
-                        muxnz   outa,           bit2                        
+                        test    lgM1_4Ctrl,     b8    wz
+                        muxnz   outa,           b2                        
 
-                        test    lgCtrlM1_4,     bit16   wz
-                        muxnz   outa,           bit4                        
+                        test    lgM1_4Ctrl,     b16   wz
+                        muxnz   outa,           b4                        
 
-                        test    lgCtrlM1_4,     bit24   wz
-                        muxnz   outa,           bit6
+                        test    lgM1_4Ctrl,     b24   wz
+                        muxnz   outa,           b6
                                                 
 'Write motor step puls outputs
-M1                      test    lgCtrlM1_4,     bit1 wz
-                        muxnz   lgStatM1_4,     bit1 
+M1                      test    lgM1_4Ctrl,     b1 wz
+                        muxnz   lgM1_4Stat,     b1 
               if_nz     jmp     #M1Stop
-                        cmp     lgActCountM1,   #0 wz    
-M1Puls                  muxz    outa,           bit1
-                        add     lgActCountM1,   #1                      
+                        cmp     lgM1ActCount,   #0 wz    
+M1Puls                  muxz    outa,           b1
+              if_z      add     lgM1ActPos,     #1
+                        add     lgM1ActCount,   #1                      
                         jmp     #M2                 
-M1Stop                  andn    outa,           bit1
-                        mov     lgActCountM1,   #0
+M1Stop                  andn    outa,           b1
+                        mov     lgM1ActCount,   #0
 
 
-M2                      test    lgCtrlM1_4,     bit9 wz
-                        muxnz   lgStatM1_4,     bit9 
+M2                      test    lgM1_4Ctrl,     b9 wz
+                        muxnz   lgM1_4Stat,     b9 
               if_nz     jmp     #M2Stop
-                        cmp     lgActCountM2,   #0 wz    
-M2Puls                  muxz    outa,           bit3
-                        add     lgActCountM2,   #1                      
+                        cmp     lgM2ActCount,   #0 wz    
+M2Puls                  muxz    outa,           b3
+                        add     lgM2ActCount,   #1                      
                         jmp     #M3                 
-M2Stop                  andn    outa,           bit3
-                        mov     lgActCountM2,   #0
+M2Stop                  andn    outa,           b3
+                        mov     lgM2ActCount,   #0
 
-M3                      test    lgCtrlM1_4,     bit17 wz
-                        muxnz   lgStatM1_4,     bit17 
+M3                      test    lgM1_4Ctrl,     b17 wz
+                        muxnz   lgM1_4Stat,     b17 
               if_nz     jmp     #M3Stop
-                        cmp     lgActCountM3,   #0 wz    
-M3Puls                  muxz    outa,           bit5        
-                        add     lgActCountM3,   #1                      
+                        cmp     lgM3ActCount,   #0 wz    
+M3Puls                  muxz    outa,           b5        
+                        add     lgM3ActCount,   #1                      
                         jmp     #M4                 
-M3Stop                  andn    outa,           bit5
-                        mov     lgActCountM3,   #0
+M3Stop                  andn    outa,           b5
+                        mov     lgM3ActCount,   #0
 
-M4                      test    lgCtrlM1_4,     bit25 wz
-                        muxnz   lgStatM1_4,     bit25 
+M4                      test    lgM1_4Ctrl,     b25 wz
+                        muxnz   lgM1_4Stat,     b25 
               if_nz     jmp     #M4Stop
-                        cmp     lgActCountM4,   #0 wz    
-M4PulsOn                muxz    outa,           bit7
-                        add     lgActCountM4,   #1                      
+                        cmp     lgM4ActCount,   #0 wz    
+M4PulsOn                muxz    outa,           b7
+                        add     lgM4ActCount,   #1                      
                         jmp     #Mend                 
-M4Stop                  andn    outa,           bit7
-                        mov     lgActCountM4,   #0
+M4Stop                  andn    outa,           b7
+                        mov     lgM4ActCount,   #0
 
 
 Mend
 'Check actual counters
-                        cmp     lgActCountM1,   lgMaxCountM1 wc
-              if_nc     mov     lgActCountM1,   #0              
-                        cmp     lgActCountM2,   lgMaxCountM2 wc
-              if_nc     mov     lgActCountM2,   #0              
-                        cmp     lgActCountM3,   lgMaxCountM3 wc
-              if_nc     mov     lgActCountM3,   #0              
-                        cmp     lgActCountM4,   lgMaxCountM4 wc
-              if_nc     mov     lgActCountM4,   #0              
+                        cmp     lgM1ActCount,   lgM1MaxCount wc
+              if_nc     mov     lgM1ActCount,   #0              
+                        cmp     lgM2ActCount,   lgM2MaxCount wc
+              if_nc     mov     lgM2ActCount,   #0              
+                        cmp     lgM3ActCount,   lgM3MaxCount wc
+              if_nc     mov     lgM3ActCount,   #0              
+                        cmp     lgM4ActCount,   lgM4MaxCount wc
+              if_nc     mov     lgM4ActCount,   #0              
 
 
 
@@ -219,16 +230,16 @@ Mend
 
 
 'Write Values   
-                        wrlong  lgStatM1_4,     hubStatM1_4
-                        wrlong  lgActCountM1,   hubActCountM1
-                        wrlong  lgActCountM2,   hubActCountM2
-                        wrlong  lgActCountM3,   hubActCountM3
-                        wrlong  lgActCountM4,   hubActCountM4
+                        wrlong  lgM1_4Stat,     hubM1_4Stat
+                        wrlong  lgM1ActCount,   hubM1ActCount
+                        wrlong  lgM2ActCount,   hubM2ActCount
+                        wrlong  lgM3ActCount,   hubM3ActCount
+                        wrlong  lgM4ActCount,   hubM4ActCount
                         
-                        wrlong  lgActPosM1,     hubActPosM1
-                        wrlong  lgActPosM2,     hubActPosM2
-                        wrlong  lgActPosM3,     hubActPosM3
-                        wrlong  lgActPosM4,     hubActPosM4
+                        wrlong  lgM1ActPos,     hubM1ActPos
+                        wrlong  lgM2ActPos,     hubM2ActPos
+                        wrlong  lgM3ActPos,     hubM3ActPos
+                        wrlong  lgM4ActPos,     hubM4ActPos
 
 'Calculate executing time   
                         mov     lgEndTime,      cnt
@@ -242,81 +253,81 @@ Mend
 ''lgDelay                 long 5000000            '0,05 sec    f =  10 Hz
 ''lgDelay                 long 500000             '0,005 sec   f = 100 Hz  
 ''lgDelay                 long 50000              '0,0005 sec  f =   1 kHz  
-lgDelay                 long 5000               '0,00005 sec f =  10 kHz
+lgDelay                 long 5000_000               '0,00005 sec f =  10 kHz
                                                 'Maxcount =2 f =10   kHz
                                                 'Maxcount =3 f = 6.6 kHz
                                                 'Maxcount =4 f = 5   kHz
                                                 'Maxcount =5 f = 2   kHz
                                                         
 
-bit0                    long $1
-bit1                    long $2
-bit2                    long $4
-bit3                    long $8
-bit4                    long $10
-bit5                    long $20
-bit6                    long $40
-bit7                    long $80
+b0                    long $1
+b1                    long $2
+b2                    long $4
+b3                    long $8
+b4                    long $10
+b5                    long $20
+b6                    long $40
+b7                    long $80
 
-bit8                    long $100
-bit9                    long $200
+b8                    long $100
+b9                    long $200
+b10                    long $200
 
-bit16                   long $10000
-bit17                   long $20000
+b16                   long $10000
+b17                   long $20000
 
-bit24                   long $1000000
-bit25                   long $2000000
+b24                   long $1000000
+b25                   long $2000000
 
-hubCtrlM1_4             long $7000
-hubStatM1_4             long $7004
+hubM1_4Ctrl             long $7000
+hubM1_4Stat             long $7004
 
-hubHomePosM1            long $7010
-hubHomePosM2            long $7014
-hubHomePosM3            long $7018
-hubHomePosM4            long $701C
+hubM1HomePos            long $7010
+hubM2HomePos            long $7014
+hubM3HomePos            long $7018
+hubM4HomePos            long $701C
 
-hubActPosM1             long $7020
-hubActPosM2             long $7024
-hubActPosM3             long $7028
-hubActPosM4             long $702C
+hubM1ActPos             long $7020
+hubM2ActPos             long $7024
+hubM3ActPos             long $7028
+hubM4ActPos             long $702C
 
-hubActCountM1           long $7030
-hubActCountM2           long $7034
-hubActCountM3           long $7038
-hubActCountM4           long $703C
+hubM1ActCount           long $7030
+hubM2ActCount           long $7034
+hubM3ActCount           long $7038
+hubM4ActCount           long $703C
 
-hubMaxCountM1           long $7040
-hubMaxCountM2           long $7044
-hubMaxCountM3           long $7048
-hubMaxCountM4           long $704C
+hubM1MaxCount           long $7040
+hubM2MaxCount           long $7044
+hubM3MaxCount           long $7048
+hubM4MaxCount           long $704C
 
 hubExecTime             long $7050
 
-lgCtrlM1_4              res
-lgStatM1_4              res
+lgM1_4Ctrl              res
+lgM1_4Stat              res
 
-lgHomePosM1             res
-lgHomePosM2             res
-lgHomePosM3             res
-lgHomePosM4             res
+lgM1HomePos             res
+lgM2HomePos             res
+lgM3HomePos             res
+lgM4HomePos             res
 
-lgActPosM1              res
-lgActPosM2              res
-lgActPosM3              res
-lgActPosM4              res
+lgM1ActPos              res
+lgM2ActPos              res
+lgM3ActPos              res
+lgM4ActPos              res
 
-lgActCountM1            res
-lgActCountM2            res
-lgActCountM3            res
-lgActCountM4            res
+lgM1ActCount            res
+lgM2ActCount            res
+lgM3ActCount            res
+lgM4ActCount            res
 
-lgMaxCountM1            res
-lgMaxCountM2            res
-lgMaxCountM3            res
-lgMaxCountM4            res
+lgM1MaxCount            res
+lgM2MaxCount            res
+lgM3MaxCount            res
+lgM4MaxCount            res
 
 lgExecTime              res
-
 lgTime                  res
 lgStartTime             res
 lgEndTime               res

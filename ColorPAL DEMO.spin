@@ -8,22 +8,16 @@ CON
   'Setup the system clock settings
   _clkmode      = xtal1 + pll16x     
   _xinfreq      = 5_000_000
-  
   PC_BAUD       = 115_200
    
 OBJ
-  ''tst             :"TestVarFreq"
   pc                :"Parallax Serial Terminal"
   motn              :"Motion"
   stpmtr            :"StepMotor1_4"
 
 VAR
-
   byte xKeyPressed
   ''long IoCtrl
-
-  ' Parameters handling
-  long  M1Par[10]
  
 PUB Main
 
@@ -31,13 +25,64 @@ PUB Main
   stpmtr.StartM1_M4(0)
  
   repeat
-    waitcnt(cnt + 50000) 
-
-    xKeyPressed := pc.CharIn
-
-    if xKeyPressed == "?"
-      pc.Str(string("=========    Propellor HUB RAM Read and Write    =========="))
+    waitcnt(cnt + 50000)
+      pc.home
+      pc.Str(string("Execution time"))
+      pc.dec(stpmtr.ExecuteTime)
       pc.NewLine
+
+      pc.Str(string("Motor, state, position, actcount, maxcount"))
+      pc.NewLine
+
+      pc.Str(string("  1      "))
+      pc.dec(stpmtr.Running(1))
+      pc.Position(20, 2)
+      pc.dec(stpmtr.ActualPosition(1))
+      pc.Position(30, 2)
+      pc.dec(stpmtr.ActualCount(1))
+      pc.Position(40, 2)
+      pc.dec(stpmtr.MaxCount(1))
+      pc.Position(50, 2)
+      pc.dec(stpmtr.ActualCount(1))
+      pc.NewLine
+
+      pc.Str(string("  2      "))
+      pc.dec(stpmtr.Running(2))
+      pc.Position(20,3)
+      pc.dec(stpmtr.ActualPosition(2))
+      pc.Position(30,3)
+      pc.dec(stpmtr.ActualCount(2))
+      pc.Position(40,3)
+      pc.dec(stpmtr.MaxCount(2))
+      pc.Position(50,3)
+      pc.dec(stpmtr.ActualCount(2))
+      pc.NewLine
+
+      pc.Str(string("  3      "))
+      pc.dec(stpmtr.Running(3))
+      pc.Position(20,4)
+      pc.dec(stpmtr.ActualPosition(3))
+      pc.Position(20,4)
+      pc.dec(stpmtr.ActualCount(3))
+      pc.Position(30,4)
+      pc.dec(stpmtr.MaxCount(3))
+      pc.Position(40,4)
+      pc.dec(stpmtr.ActualCount(3))
+      pc.NewLine
+
+      pc.Str(string("  4      "))
+      pc.dec(stpmtr.Running(3))
+      pc.Position(20,5)
+      pc.dec(stpmtr.ActualPosition(4))
+      pc.Position(20,5)
+      pc.dec(stpmtr.ActualCount(4))
+      pc.Position(30,5)
+      pc.dec(stpmtr.MaxCount(4))
+      pc.Position(40,5)
+      pc.dec(stpmtr.ActualCount(4))
+      pc.NewLine
+
+    xKeyPressed := pc.RxCheck
 
     if xKeyPressed == "1"
       stpmtr.SetDir(1, false)
