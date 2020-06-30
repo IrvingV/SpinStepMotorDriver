@@ -20,7 +20,6 @@ CON
 OBJ
 
   F: "Float32Full"
-  S: "FloatString"
 
 VAR
 
@@ -33,6 +32,11 @@ long lgM1SollPos
 long lgM2SollPos
 long lgM3SollPos
 long lgM4SollPos
+
+long lgM1IstPos
+long lgM2IstPos
+long lgM3IstPos
+long lgM4IstPos
 
 word woM1Speed
 word woM2Speed
@@ -67,11 +71,25 @@ byte byCogID1
 byte byM1State
 byte xM1Run            
 byte xM1Running            
- 
-PUB Start(x)
+
+
+long x,y,z
+
+
+PUB Start
    
   byCogID1 := cognew (MotionLoop,0)
+  F.start
+  
 
+PUB PrintFloatTest
+
+      x := 3.14159265
+      y := F.FMUL(2.0,x)
+      z := F.FDIV(y,FLOAT(2))
+
+   return z
+   
 
 PUB MotionLoop
   

@@ -11,23 +11,25 @@ CON
   PC_BAUD       = 115_200
    
 OBJ
-  pc                :"Parallax Serial Terminal"
-  motn              :"Motion"
-  stpmtr            :"StepMotor1_4"
+  pc            : "Parallax Serial Terminal"
+  motn          : "Motion"
+  stpmtr        : "StepMotor1_4"
+  S             : "FloatString"
 
 VAR
   byte xKeyPressed
   ''long IoCtrl
+  long abc
  
 PRI PrnXyDec(x,y,d)
   pc.Position(x,y)
-  pc.Str(string("          "))
-  pc.Position(x,y)
+  pc.Str(string("> "))
   pc.dec(d)
+  pc.Str(string(" <"))
 
-PRI PrnXyStr(x,y,s)
+PRI PrnXyStr(x,y,str)
   pc.Position(x,y)
-  pc.Str(s)
+  pc.Str(str)
     
 PRI PrnXyBool(x,y,b)
   pc.Position(x,y)
@@ -36,48 +38,51 @@ PRI PrnXyBool(x,y,b)
   elseif b==0
     pc.Str(string("FALSE"))
   else
-    pc.Str(string("???"))  
+    pc.Str(string("?????"))  
 
 PUB Main
 
   pc.Start(PC_BAUD)
   stpmtr.StartM1_M4(0)
+  motn.start
   stpmtr.SetSpeedFast(1,false)
   stpmtr.SetSpeedFast(2,false)
   stpmtr.SetSpeedFast(3,false)
   stpmtr.SetSpeedFast(4,false)
-  PrnXyStr(1, 2, string("exec time"))
-  PrnXyStr(1, 4, string("Motor, state, position, actcount, maxcount"))
- 
+  pc.clear
   repeat
-      waitcnt(cnt + 50000)
-      PrnXyDec(10, 2, stpmtr.ExecuteTime)
-      PrnXyDec(20, 2, stpmtr.LoopCount/2)
+      waitcnt(cnt + 10000)
+      PrnXyStr(1, 2, string("stepmotor execute time and taskcounter "))
+      PrnXyDec(50, 2, stpmtr.ExecuteTime)
+      PrnXyDec(60, 2, stpmtr.LoopCount / 2)
 
-      PrnXyBool(10, 5, stpmtr.Running(1))
-      PrnXyDec(20, 5, stpmtr.ActualCount(1))
-      PrnXyDec(30, 5, stpmtr.MaxCount(1))
-      PrnXyDec(40, 5, stpmtr.ActualPosition(1))
-      PrnXyBool(50, 5, stpmtr.Direction(1))
+      PrnXyBool(10, 4, stpmtr.Running(1))
+      PrnXyBool(20, 4, stpmtr.Direction(1))
+      PrnXyDec (30, 4, stpmtr.ActualPosition(1))
+      ''PrnXyDec(40, 4, stpmtr.ActualCount(1))
+      ''PrnXyDec(50, 4, stpmtr.MaxCount(1))
+   
+      PrnXyBool(10, 5, stpmtr.Running(2))
+      PrnXyBool(20, 5, stpmtr.Direction(2))
+      PrnXyDec (30, 5, stpmtr.ActualPosition(2))
+      ''PrnXyDec(40, 5, stpmtr.ActualCount(2))
+      ''PrnXyDec(50, 5, stpmtr.MaxCount(2))
 
-      PrnXyBool(10, 6, stpmtr.Running(2))
-      PrnXyDec(20, 6, stpmtr.ActualCount(2))
-      PrnXyDec(30, 6, stpmtr.MaxCount(2))
-      PrnXyDec(40, 6, stpmtr.ActualPosition(2))
-      PrnXyBool(50, 6, stpmtr.Direction(2))
+      PrnXyBool(10, 6, stpmtr.Running(3))
+      PrnXyBool(20, 6, stpmtr.Direction(3))
+      PrnXyDec (30, 6, stpmtr.ActualPosition(3))
+      ''PrnXyDec(40, 6, stpmtr.ActualCount(3))
+      ''PrnXyDec(50, 6, stpmtr.MaxCount(3))
 
-      PrnXyBool(10, 7, stpmtr.Running(3))
-      PrnXyDec(20, 7, stpmtr.ActualCount(3))
-      PrnXyDec(30, 7, stpmtr.MaxCount(3))
-      PrnXyDec(40, 7, stpmtr.ActualPosition(3))
-      PrnXyBool(50, 7, stpmtr.Direction(3))
+      PrnXyBool(10, 7, stpmtr.Running(4))
+      PrnXyBool(20, 7, stpmtr.Direction(4))
+      PrnXyDec (30, 7, stpmtr.ActualPosition(4))
+      ''PrnXyDec(40, 7, stpmtr.ActualCount(4))
+      ''PrnXyDec(50, 7, stpmtr.MaxCount(4))
 
-      PrnXyBool(10, 8, stpmtr.Running(4))
-      PrnXyDec(20, 8, stpmtr.ActualCount(4))
-      PrnXyDec(30, 8, stpmtr.MaxCount(4))
-      PrnXyDec(40, 8, stpmtr.ActualPosition(4))
-      PrnXyBool(50, 8, stpmtr.Direction(4))
-
+       pc.Str(string(" >>>>> "))
+       pc.Dec(S.FloatToString(10.0))
+  
     xKeyPressed := pc.RxCheck
 
     if xKeyPressed == "1"

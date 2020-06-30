@@ -185,14 +185,14 @@ M1Stop                  andn    outa,           b1
 
 
 
-M2                      test    lgM1_4Ctrl,     b3 wz
-                        muxnz   lgM1_4Stat,     b3 
+M2                      test    lgM1_4Ctrl,     b9 wz
+                        muxnz   lgM1_4Stat,     b9 
               if_z      jmp     #M2Stop
               
                         cmp     lgM2ActCount,   #0 wz    
               if_nz     jmp     #M2PulsOff 
 M2PulsOn                or      outa,           b3
-                        test    lgM1_4Ctrl,     b2    wz
+                        test    lgM1_4Ctrl,     b8    wz
               if_z      add     lgM2ActPos,     #1
               if_nz     sub     lgM2ActPos,     #1
                         jmp     #M2ActCount
@@ -207,14 +207,14 @@ M2Stop                  andn    outa,           b3
 
 
 
-M3                      test    lgM1_4Ctrl,     b5 wz
-                        muxnz   lgM1_4Stat,     b5 
+M3                      test    lgM1_4Ctrl,     b17 wz
+                        muxnz   lgM1_4Stat,     b17 
               if_z      jmp     #M3Stop
               
                         cmp     lgM3ActCount,   #0 wz    
               if_nz     jmp     #M3PulsOff 
 M3PulsOn                or      outa,           b5
-                        test    lgM1_4Ctrl,     b4    wz
+                        test    lgM1_4Ctrl,     b16    wz
               if_z      add     lgM3ActPos,     #1
               if_nz     sub     lgM3ActPos,     #1
                         jmp     #M3ActCount
@@ -228,14 +228,14 @@ M3Stop                  andn    outa,           b5
                         mov     lgM3ActCount,   #0
 
 
-M4                      test    lgM1_4Ctrl,     b7 wz
-                        muxnz   lgM1_4Stat,     b7 
+M4                      test    lgM1_4Ctrl,     b25 wz
+                        muxnz   lgM1_4Stat,     b25 
               if_z      jmp     #M4Stop
               
                         cmp     lgM4ActCount,   #0 wz    
               if_nz     jmp     #M4PulsOff 
 M4PulsOn                or      outa,           b7
-                        test    lgM1_4Ctrl,     b6    wz
+                        test    lgM1_4Ctrl,     b24    wz
               if_z      add     lgM4ActPos,     #1
               if_nz     sub     lgM4ActPos,     #1
                         jmp     #M4ActCount
@@ -282,11 +282,11 @@ Mend
 
                         jmp     #mainloop                        
                                                          
-lgDelay                 long 100_000_000        '1 sec
+''lgDelay                 long 100_000_000        '1 sec
 ''lgDelay                 long  5_000_000       '0,05 sec    f =  10 Hz
 ''lgDelay                 long    500_000       '0,005 sec   f = 100 Hz  
 ''lgDelay                 long     50_000       '0,0005 sec  f =   1 kHz  
-''lgDelay                 long      5_000       '0,00005 sec
+lgDelay                 long      5_000       '0,00005 sec
                                                 'Maxcount =2 f = 10   kHz
                                                 'Maxcount =3 f =  6.6 kHz
                                                 'Maxcount =4 f =  5   kHz
