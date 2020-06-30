@@ -19,8 +19,6 @@ CON
   
 OBJ
 
-  F: "Float32Full"
-
 VAR
 
 byte xM1Enable
@@ -53,7 +51,7 @@ long lgM2Dec
 long lgM3Dec
 long lgM4Dec
 
-
+b
 
 long lgActualPos1         
 long lgStartTime1             
@@ -69,33 +67,25 @@ byte xDirectionBackward1
 byte byCogID1
 
 byte byM1State
-byte xM1Run            
-byte xM1Running            
-
-
-long x,y,z
+byte byM2State
+byte byM3State
+byte byM4State
 
 
 PUB Start
    
   byCogID1 := cognew (MotionLoop,0)
-  F.start
-  
 
-PUB PrintFloatTest
-
-      x := 3.14159265
-      y := F.FMUL(2.0,x)
-      z := F.FDIV(y,FLOAT(2))
-
-   return z
-   
 
 PUB MotionLoop
-  
 
+  'Parameters
+    'woMxSpeed                1..10000                  steps/sec
+    'woMxAcc                  100..100000               steps/sec^2
+    'woMxDec                  100..100000               steps/sec^2
+    'woSollPos                min..max                  steps
 
-
+    
   case byM1State
 
     0:
@@ -104,15 +94,18 @@ PUB MotionLoop
            byM1State := 1
            xM1Running := TRUE
 
-    1:
-      ''flM1ActualSpeed := flM1ActualSpeed + (flM1Acc10ms)
+    1:  'Calculations
 
+      xShortTrack := ( lgM1SollPos - long[hubM1ActPos] ) <= woM1Speed
 
+      IF xShortTrack
+        woCalcMaxSpeed := lgSollPosition - long[hubM1ActPos]
+      else
+        woCalcMaxSpeed := woM1Speed
+        
+      byM1State := 2
     
-      ''IF woM1ActualSpeed >= woM1MaxSpeed
-             byM1State := 2
-    {{
-    case 2:
+    2:
       ''IF lgM1SollPos-lgM1IstPos < lgM1DecDistance
              byM1State := 3
 
@@ -148,3 +141,10 @@ PUB MotionLoop
       3: long[hubCtrlM1_4] := long[hubCtrlM1_4] | bit17
       4: long[hubCtrlM1_4] := long[hubCtrlM1_4] | bit25
       }}
+
+DAT
+
+hubM1ActPos             long $7020
+hubM2ActPos             long $7024
+hubM3ActPos             long $7028
+hubM4ActPos             long $702C
