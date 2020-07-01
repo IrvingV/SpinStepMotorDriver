@@ -21,55 +21,31 @@ OBJ
 
 VAR
 
-byte xM1Enable
-byte xM2Enable
-byte xM3Enable
-byte xM4Enable
+byte xM1Enable,    xM2Enable,    xM3Enable,    xM4Enable
+byte xM1Run,       xM2Run,       xM3Run,       xM4Run
+byte xM1Running,   xM2Running,   xM3Running,   xM4Running
+byte xM1ShortTrack,xM2ShortTrack,xM3ShortTrack,xM4ShortTrack
 
-long lgM1SollPos
-long lgM2SollPos
-long lgM3SollPos
-long lgM4SollPos
+byte byM1State,    byM2State,    byM3State,    byM4State
 
-long lgM1IstPos
-long lgM2IstPos
-long lgM3IstPos
-long lgM4IstPos
+long lgM1SollPos,  lgM2SollPos,  lgM3SollPos,  lgM4SollPos
+long lgM1IstPos,   lgM2IstPos,   lgM3IstPos,   lgM4IstPos
 
-word woM1Speed
-word woM2Speed
-word woM3Speed
-word woM4Speed
+word woM1Speed,    woM2Speed,    woM3Speed,    woM4Speed
+word woM1MinSpeed, woM2MinSpeed, woM3MinSpeed, woM4MinSpeed
 
-long lgM1Acc
-long lgM2Acc
-long lgM3Acc
-long lgM4Acc
+long lgM1Acc,      lgM2Acc,      lgM3Acc,      lgM4Acc
+long lgM1Dec,      lgM2Dec,      lgM3Dec,      lgM4Dec
 
-long lgM1Dec
-long lgM2Dec
-long lgM3Dec
-long lgM4Dec
-
-b
+long x1,x2
 
 long lgActualPos1         
 long lgStartTime1             
 long lgExecuteTime1               
 
-word woPulsCount1     
-word woMaxPulsCount1       
-
-byte byPinDirection1    
-byte byPinStepPuls1         
-byte xRun1                      
-byte xDirectionBackward1            
 byte byCogID1
 
-byte byM1State
-byte byM2State
-byte byM3State
-byte byM4State
+
 
 
 PUB Start
@@ -90,32 +66,44 @@ PUB MotionLoop
 
     0:
       IF xM1Run
-           xM1Run := FALSE
-           byM1State := 1
-           xM1Running := TRUE
+        xM1Run := FALSE
+        xM1Running := TRUE
+
+        byM1State := 1
 
     1:  'Calculations
 
-      xShortTrack := ( lgM1SollPos - long[hubM1ActPos] ) <= woM1Speed
+      x1 := ( woM1Speed * woM1Speed ) / (2 * lgM1Acc ) 
+      x2 := ( woM1Speed * woM1Speed ) / (2 * lgM1Dec ) 
 
-      IF xShortTrack
-        woCalcMaxSpeed := lgSollPosition - long[hubM1ActPos]
-      else
-        woCalcMaxSpeed := woM1Speed
-        
+      xM1ShortTrack := ( lgM1SollPos - long[hubM1ActPos] ) =<( x1 + x2 )
+
+      lgM1AccelCalc := lgM1Acc / 100
+      lgM1DecelCalc := lgM1Dec / 100
+      
       byM1State := 2
     
     2:
-      ''IF lgM1SollPos-lgM1IstPos < lgM1DecDistance
+      woM1ActualSpeed =  woM1ActualSpeed + lgM1AccelCalc
+      IF woM1ActualSpeed > woM1Speed
+        woM1ActualSpeed := woM1Speed
+
+      IF xM1ShortTrack      
+        IF lgM1SollPos-lgM1IstPos < x2
              byM1State := 3
+      else
+        IF lgM1SollPos-lgM1IstPos < x2
+             byM1State := 3
+      
+             
 
     case 3:
-      ''woM1ActualSpeed := woM1ActualSpeed - (lgM1Dec/100)
-
-
-      ''IF lgM1SollPos-lgM1IstPos < lgM1HystPos
-             byM1State := 4
-
+      woM1ActualSpeed =  woM1ActualSpeed - lgM1DecelCalc
+      IF woM1ActualSpeed < woM1MinSpeed
+        woM1ActualSpeed := woM1Speed
+             
+      IF lgM1SollPos-lgM1IstPos <= lgM1Lag
+             byM1State := 3
     case 4:
       ''IF !M1Run         
         xM1Running := FALSE
@@ -140,7 +128,6 @@ PUB MotionLoop
       2: long[hubCtrlM1_4] := long[hubCtrlM1_4] | bit9
       3: long[hubCtrlM1_4] := long[hubCtrlM1_4] | bit17
       4: long[hubCtrlM1_4] := long[hubCtrlM1_4] | bit25
-      }}
 
 DAT
 
