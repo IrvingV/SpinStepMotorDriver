@@ -33,9 +33,15 @@ long lgM1IstPos,   lgM2IstPos,   lgM3IstPos,   lgM4IstPos
 
 word woM1Speed,    woM2Speed,    woM3Speed,    woM4Speed
 word woM1MinSpeed, woM2MinSpeed, woM3MinSpeed, woM4MinSpeed
+word woM1ActualSpeed,woM2ActualSpeed,woM3ActualSpeed,woM4ActualSpeed
+word woM1CalcSpeed,woM2CalcSpeed,woM3CalcSpeed,woM4CalcSpeed
 
 long lgM1Acc,      lgM2Acc,      lgM3Acc,      lgM4Acc
 long lgM1Dec,      lgM2Dec,      lgM3Dec,      lgM4Dec
+long lgM1Lag,      lgM2lag,      lgM3Lag,      lgM4Lag
+
+long lgM1AccelCalc,lgM2AccelCalc,lgM3AccelCalc,lgM4AccelCalc
+long lgM1DecelCalc,lgM2DecelCalc,lgM3DecelCalc,lgM4DecelCalc
 
 long x1,x2
 
@@ -72,7 +78,6 @@ PUB MotionLoop
         byM1State := 1
 
     1:  'Calculations
-
       x1 := ( woM1Speed * woM1Speed ) / (2 * lgM1Acc ) 
       x2 := ( woM1Speed * woM1Speed ) / (2 * lgM1Dec ) 
 
@@ -84,50 +89,35 @@ PUB MotionLoop
       byM1State := 2
     
     2:
-      woM1ActualSpeed =  woM1ActualSpeed + lgM1AccelCalc
+      woM1ActualSpeed :=  woM1ActualSpeed + lgM1AccelCalc
       IF woM1ActualSpeed > woM1Speed
         woM1ActualSpeed := woM1Speed
 
       IF xM1ShortTrack      
-        IF lgM1SollPos-lgM1IstPos < x2
+        IF woM1ActualSpeed := woM1CalcSpeed
              byM1State := 3
       else
         IF lgM1SollPos-lgM1IstPos < x2
              byM1State := 3
-      
-             
-
-    case 3:
-      woM1ActualSpeed =  woM1ActualSpeed - lgM1DecelCalc
+  
+    3:
+      woM1ActualSpeed :=  woM1ActualSpeed - lgM1DecelCalc
       IF woM1ActualSpeed < woM1MinSpeed
         woM1ActualSpeed := woM1Speed
              
       IF lgM1SollPos-lgM1IstPos <= lgM1Lag
              byM1State := 3
-    case 4:
+    4:
       ''IF !M1Run         
         xM1Running := FALSE
             
 
 
-  IF xM1RampingUp
-      woM1ActualSpeed := woM1ActualSpeed + (lgM1Acc/100)
-      IF woM1ActualSpeed >= WOMaxSpeed
+  
               
 
   
-  if Run
-    case x
-      1: long[hubCtrlM1_4] := long[hubCtrlM1_4] & !bit1  
-      2: long[hubCtrlM1_4] := long[hubCtrlM1_4] & !bit9
-      3: long[hubCtrlM1_4] := long[hubCtrlM1_4] & !bit17
-      4: long[hubCtrlM1_4] := long[hubCtrlM1_4] & !bit25
-  else
-    case x
-      1: long[hubCtrlM1_4] := long[hubCtrlM1_4] | bit1  
-      2: long[hubCtrlM1_4] := long[hubCtrlM1_4] | bit9
-      3: long[hubCtrlM1_4] := long[hubCtrlM1_4] | bit17
-      4: long[hubCtrlM1_4] := long[hubCtrlM1_4] | bit25
+ 
 
 DAT
 

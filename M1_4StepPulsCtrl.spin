@@ -1,15 +1,33 @@
 ' 
 '********************************************************************************
-'*  Step Motor Pulscontrol (SPIN language)                                      *
+'*  Step Motor: StepPulsControl (SPIN language)                                      *
 '*  Author: Irving Verijdt                                                      *
 '*                                                                              *
-'*  Hardware    Inputs:         -                                               *
-'*     *                                                         *
-'*  Outputs:    * xoForward                                               *
-'*              * xoStepPuls                                              *
-'*  Hardware                                                              *
-'*  Hardware                                                              *
+'********************************************************************************
+'*
+'* Task time = 50 usec
+'
 
+
+'* Inputs Hardware
+'*              -
+'*
+'*              hubM1_4Stat.    b0 = M1 Direction motor                               
+'*                              b1 = M1 Run
+'*                              b2 = M1 Set                        
+'*                              b8 = M2 Direction motor                               
+'*                              b9 = M2 Run     
+'*
+'* Outputs Hardware
+'       outa.b0,b2,b4,b6 = Direction Stepmotor M1, M2, M3, M4
+'       outa.b1,b3,b5,b7 = Step puls Stepmotor M1, M2, M3, M4
+'       hubM1_4Stat.    b0 = Direction motor                                
+'                       b1 = Run      
+
+
+
+
+    
 
 '**************************************************************************
 
@@ -115,7 +133,6 @@ PUB MaxCount (x)
     4: return long[hubM4MaxCount]
 
 DAT
-    
 'Initialisation
 Entry                   mov     dira,           #%11111111
                         mov     outa,           #%00000000

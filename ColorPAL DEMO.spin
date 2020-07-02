@@ -12,9 +12,8 @@ CON
    
 OBJ
   pc            : "Parallax Serial Terminal"
-  motn          : "Motion"
-  stpmtr        : "StepMotor1_4"
-  S             : "FloatString"
+  motn          : "M1_4MotionCtrl"
+  stpmtr        : "M1_4StepPulsCtrl"
 
 VAR
   byte xKeyPressed
@@ -80,9 +79,7 @@ PUB Main
       ''PrnXyDec(40, 7, stpmtr.ActualCount(4))
       ''PrnXyDec(50, 7, stpmtr.MaxCount(4))
 
-       pc.Str(string(" >>>>> "))
-       pc.Dec(S.FloatToString(10.0))
-  
+
     xKeyPressed := pc.RxCheck
 
     if xKeyPressed == "1"
