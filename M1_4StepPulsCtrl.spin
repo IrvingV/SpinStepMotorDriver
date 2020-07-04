@@ -1,35 +1,47 @@
 ' 
-'********************************************************************************
-'*  Step Motor: StepPulsControl (SPIN language)                                      *
-'*  Author: Irving Verijdt                                                      *
-'*                                                                              *
-'********************************************************************************
-'*
+'***************************************************************************************************
+'*  Step Motor: StepPulsControl (SPIN language)                                                    *
+'*  Author    : Irving Verijdt                                                                     *
+'*  file      : M1_4StepPulsCtrl.spin                                                              *
+'***************************************************************************************************
+'*                                  
 '* Task time = 50 usec
-'
-
-
-'* Inputs Hardware
-'*              -
 '*
-'*              hubM1_4Stat.    b0 = M1 Direction motor                               
-'*                              b1 = M1 Run
-'*                              b2 = M1 Set                        
-'*                              b8 = M2 Direction motor                               
-'*                              b9 = M2 Run     
+'* M1,M2,M3,M4  <>  x=1,2,3,4 <>  m=0,2,4,6  <>  n=0,8,16,24                                  
+'*                         
+'* HW Inputs      -         
+'*                                                         
+'* HW Outputs     outa          b[m+0]                  StepMotor direction 
+'*                              b[m+1]                  StepMotor Puls   
 '*
-'* Outputs Hardware
-'       outa.b0,b2,b4,b6 = Direction Stepmotor M1, M2, M3, M4
-'       outa.b1,b3,b5,b7 = Step puls Stepmotor M1, M2, M3, M4
-'       hubM1_4Stat.    b0 = Direction motor                                
-'                       b1 = Run      
-
-
-
-
-    
-
-'**************************************************************************
+'* Parameters in  hubM1_4Ctrl.  b[n+0]                  (internal used) pulscontrol backward                             
+'*                              b[n+1]                  (internal used) pulscontrol enable                             
+'*                              b[n+2]                  Mx auto mode (not manual mode)                             
+'*                              b[n+3]                  Mx enable control
+'*                              b[n+4]                  Mx Set home position 
+'*                              b[n+5]                  Mx jog forward 
+'*                              b[n+6]                  Mx jog backward 
+'*                hubMxMaxCount                         Mx delay next puls 
+'*                hubMxWntPos                           Mx wanted position
+'*                hubMxHomePos                          Mx home position 
+'*
+'* Parameters out hubM1_4Stat   b[n+0]                  Mx direction
+'*                              b[n+1]                  Mx moving
+'*                              b[n+2]                  Mx actual position equals wanted postion
+'*                hubMxActPos                           Mx actual position
+'*                (hubMxActCount)                       
+'*                (hubExecCounter) 
+'*                (hubExecTime)
+'*
+'* Methods        Enable                                resets all ctrl bits
+'*                SetPosition(position [steps])         change actual position (sollwert := istwert)
+'*                SetSpeed(speed [steppulses/sec])      change puls delay
+'*                JogForward                            set/reset move Forward               
+'*                JogBackward                           set/reset move Backward 
+'*                SetWantedPosion
+'*                Enable                                set/reset enable
+'*
+'***************************************************************************************************
 
 CON                                                                           
   _clkmode      = xtal1 + pll16x     
@@ -95,9 +107,9 @@ PUB ExecuteTime
   return long[hubExecTime]
 
 PUB LoopCount
-  return long[hubLoopCount]
+  return long[hubExecCounter]
 
-PUB Running(x)
+PUB Exec(x)
   case x
     1: return long[hubM1_4Stat] & b1 == b1  
     2: return long[hubM1_4Stat] & b9 == b9 
@@ -143,13 +155,13 @@ Entry                   mov     dira,           #%11111111
                         mov     lgM2ActPos,     #0
                         mov     lgM3ActPos,     #0
                         mov     lgM4ActPos,     #0
-                        mov     lgLoopCount,    #0
+                        mov     lgExecCounter,  #0
                         
                         mov     lgTime, cnt
                         add     lgTime, #9
 'Wait for next sample
 mainloop                waitcnt lgTime,         lgDelay
-                        add     lgLoopCount,    #1
+                        add     lgExecCounter,  #1
                         mov     lgStartTime,    cnt
 'Read Parameters
                         rdlong  lgM1_4Ctrl,     hubM1_4Ctrl
@@ -162,7 +174,47 @@ mainloop                waitcnt lgTime,         lgDelay
                         rdlong  lgM3HomePos,    hubM3HomePos
                         rdlong  lgM4HomePos,    hubM4HomePos
 
-'Write motor directions outputs + update status
+
+'Set direction
+
+                        andn    lgMCtrl,        b0                 'Forward := false
+                        cmps    lgM1ActPos,     lgM1EndPos  wc,wz 'Ist > Soll
+              if_a      or      lgMCtrl,        b0                 'Forward := true
+                        test    lgM1_4Ctrl,     b6 wz
+              if_nz     or      lgMCtrl,        b0                 'Forward := true
+
+
+'Set Enable
+
+
+
+
+
+
+'                   if jog backward OR actpos-endpos <0
+
+
+
+
+
+
+   ''                     cmps    lgM1ActPos, lgM1EndPos  wc,wz 'Ist < Soll
+ 
+
+     ''                   cmps    lgM1ActPos, lgM1EndPos  wc,wz 'Ist > Soll 
+       ''       if_a      or      lgMStat,b1                 'Backward := true
+ 
+
+
+
+
+
+
+
+
+                        
+
+' Direction control
                         test    lgM1_4Ctrl,     b0    wz
                         muxnz   outa,           b0                        
                         muxnz   lgM1_4Stat,     b0 
@@ -178,8 +230,9 @@ mainloop                waitcnt lgTime,         lgDelay
                         test    lgM1_4Ctrl,     b24   wz
                         muxnz   outa,           b6
                         muxnz   lgM1_4Stat,     b24 
-                                                
-'Write motor step puls outputs
+
+' Puls control  
+
 M1                      test    lgM1_4Ctrl,     b1 wz
                         muxnz   lgM1_4Stat,     b1 
               if_z      jmp     #M1Stop
@@ -187,7 +240,7 @@ M1                      test    lgM1_4Ctrl,     b1 wz
                         cmp     lgM1ActCount,   #0 wz    
               if_nz     jmp     #M1PulsOff 
 M1PulsOn                or      outa,           b1
-                        test    lgM1_4Ctrl,     b0    wz
+                        test    lgM1_4Ctrl,     b1    wz
               if_z      add     lgM1ActPos,     #1
               if_nz     sub     lgM1ActPos,     #1
                         jmp     #M1ActCount
@@ -279,17 +332,17 @@ Mend
 
 'Write Values   
                         wrlong  lgM1_4Stat,     hubM1_4Stat
+                        wrlong  lgM1ActPos,     hubM1ActPos
+                        wrlong  lgM2ActPos,     hubM2ActPos
+                        wrlong  lgM3ActPos,     hubM3ActPos
+                        wrlong  lgM4ActPos,     hubM4ActPos
+
                         wrlong  lgM1ActCount,   hubM1ActCount
                         wrlong  lgM2ActCount,   hubM2ActCount
                         wrlong  lgM3ActCount,   hubM3ActCount
                         wrlong  lgM4ActCount,   hubM4ActCount
                         
-                        wrlong  lgM1ActPos,     hubM1ActPos
-                        wrlong  lgM2ActPos,     hubM2ActPos
-                        wrlong  lgM3ActPos,     hubM3ActPos
-                        wrlong  lgM4ActPos,     hubM4ActPos
-                        
-                        wrlong  lgLoopCount,    hubLoopCount
+                        wrlong  lgExecCounter,  hubExecCounter
 
 'Calculate executing time   
                         mov     lgEndTime,      cnt
@@ -341,6 +394,11 @@ hubM2ActPos             long $7024
 hubM3ActPos             long $7028
 hubM4ActPos             long $702C
 
+hubM1EndPos             long $7060
+hubM2EndPos             long $7064
+hubM3EndPos             long $7068
+hubM4EndPos             long $706C
+
 hubM1ActCount           long $7030
 hubM2ActCount           long $7034
 hubM3ActCount           long $7038
@@ -352,9 +410,9 @@ hubM3MaxCount           long $7048
 hubM4MaxCount           long $704C
 
 hubExecTime             long $7050
-hubLoopCount            long $7054
+hubExecCounter          long $7054
 
-lgLoopCount             res
+lgExecCounter           res
 
 lgM1_4Ctrl              res
 lgM1_4Stat              res
@@ -368,6 +426,11 @@ lgM1ActPos              res
 lgM2ActPos              res
 lgM3ActPos              res
 lgM4ActPos              res
+
+lgM1EndPos              res
+lgM2EndPos              res
+lgM3EndPos              res
+lgM4EndPos              res
 
 lgM1ActCount            res
 lgM2ActCount            res
