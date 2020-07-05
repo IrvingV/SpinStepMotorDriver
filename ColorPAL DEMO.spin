@@ -17,8 +17,32 @@ OBJ
 
 VAR
   byte xKeyPressed
-  ''long IoCtrl
-  long abc
+
+  long M1AutoMode
+  long M2AutoMode
+  long M3AutoMode
+  long M4AutoMode
+
+  long M1Enabled
+  long M2Enabled
+  long M3Enabled
+  long M4Enabled
+
+  long M1WntPos
+  long M2WntPos
+  long M3WntPos
+  long M4WntPos
+
+  long M1JogForward
+  long M2JogForward
+  long M3JogForward
+  long M4JogForward
+
+  long M1JogBackward
+  long M2JogBackward
+  long M3JogBackward
+  long M4JogBackward
+  byte i
  
 PRI PrnXyDec(x,y,d)
   pc.Position(x,y)
@@ -32,9 +56,9 @@ PRI PrnXyStr(x,y,str)
     
 PRI PrnXyBool(x,y,b)
   pc.Position(x,y)
-  if b==-1
+  if b==true
     pc.Str(string("TRUE "))
-  elseif b==0
+  elseif b==false
     pc.Str(string("FALSE"))
   else
     pc.Str(string("?????"))  
@@ -44,10 +68,19 @@ PUB Main
   pc.Start(PC_BAUD)
   stpmtr.StartM1_M4(0)
   motn.start
-  stpmtr.SetSpeedFast(1,false)
-  stpmtr.SetSpeedFast(2,false)
-  stpmtr.SetSpeedFast(3,false)
-  stpmtr.SetSpeedFast(4,false)
+  stpmtr.SetMaxCount(1,4)
+  stpmtr.SetMaxCount(2,4)
+  stpmtr.SetMaxCount(3,4)
+  stpmtr.SetMaxCount(4,4)
+  M1AutoMode := false
+  M2AutoMode := false
+  M3AutoMode := false
+  M4AutoMode := false
+  M1Enabled := false
+  M2Enabled := false
+  M3Enabled := false
+  M4Enabled := false
+  
   pc.clear
   repeat
       waitcnt(cnt + 10000)
@@ -55,93 +88,99 @@ PUB Main
       PrnXyDec(50, 2, stpmtr.ExecuteTime)
       PrnXyDec(60, 2, stpmtr.LoopCount / 2)
 
-      PrnXyBool(10, 4, stpmtr.Running(1))
-      PrnXyBool(20, 4, stpmtr.Direction(1))
-      PrnXyDec (30, 4, stpmtr.ActualPosition(1))
-      ''PrnXyDec(40, 4, stpmtr.ActualCount(1))
-      ''PrnXyDec(50, 4, stpmtr.MaxCount(1))
-   
-      PrnXyBool(10, 5, stpmtr.Running(2))
-      PrnXyBool(20, 5, stpmtr.Direction(2))
-      PrnXyDec (30, 5, stpmtr.ActualPosition(2))
-      ''PrnXyDec(40, 5, stpmtr.ActualCount(2))
-      ''PrnXyDec(50, 5, stpmtr.MaxCount(2))
+      PrnXyStr(0, 5, string(" 1=auto/manual  2=disabled/enabled   3=homepos   4=wantedpos   5=fast   6=slow   7=JogFw   8=JogBw"))
 
-      PrnXyBool(10, 6, stpmtr.Running(3))
-      PrnXyBool(20, 6, stpmtr.Direction(3))
-      PrnXyDec (30, 6, stpmtr.ActualPosition(3))
-      ''PrnXyDec(40, 6, stpmtr.ActualCount(3))
-      ''PrnXyDec(50, 6, stpmtr.MaxCount(3))
+'                            01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890'
+      PrnXyStr(0, 9, string("          mode      enabled   direction pulsing   act.pos   wnt.pos   At.pos    act.count max.count"))
+      i:=1
+      PrnXyBool(10, i+11, M1AutoMode)
+      PrnXyBool(20, i+11, M1Enabled)
+      PrnXyBool(30, i+11, stpmtr.Direction(i))
+      PrnXyBool(40, i+11, stpmtr.Pulsing(i))
+      PrnXyDec (50, i+11, stpmtr.ActualPosition(i))
+      PrnXyDec (60, i+11, stpmtr.WantedPosition(i))
+      PrnXyBool(70, i+11, stpmtr.AtPosition(i))
+      PrnXyDec (80, i+11, stpmtr.ActualCount(i))
+      PrnXyDec (90, i+11, stpmtr.MaxCount(i))
 
-      PrnXyBool(10, 7, stpmtr.Running(4))
-      PrnXyBool(20, 7, stpmtr.Direction(4))
-      PrnXyDec (30, 7, stpmtr.ActualPosition(4))
-      ''PrnXyDec(40, 7, stpmtr.ActualCount(4))
-      ''PrnXyDec(50, 7, stpmtr.MaxCount(4))
+
 
 
     xKeyPressed := pc.RxCheck
 
     if xKeyPressed == "1"
-      stpmtr.SetDir(1, false)
+      stpmtr.AutoMode(1,NOT M1AutoMode)
+      M1AutoMode := NOT M1AutoMode
     if xKeyPressed == "q"
-      stpmtr.SetDir(2, false)
+      stpmtr.AutoMode(2,NOT M2AutoMode)
+      M2AutoMode := NOT M2AutoMode
     if xKeyPressed == "a"
-      stpmtr.SetDir(3, false)
+      stpmtr.AutoMode(3,NOT M3AutoMode)
+      M3AutoMode := NOT M3AutoMode
     if xKeyPressed == "z"
-      stpmtr.SetDir(4, false)
+      stpmtr.AutoMode(4,NOT M4AutoMode)
+      M4AutoMode := NOT M4AutoMode
 
     if xKeyPressed == "2"
-      stpmtr.SetDir(1,true)
+      stpmtr.Enable(1,NOT M1Enabled)
+      M1Enabled := NOT M1Enabled
     if xKeyPressed == "w"
-      stpmtr.SetDir(2,true)
+      stpmtr.Enable(2,NOT M2Enabled)
+      M2Enabled := NOT M2Enabled
     if xKeyPressed == "s"
-      stpmtr.SetDir(3,true)
+      stpmtr.Enable(3,NOT M3Enabled)
+      M3Enabled := NOT M3Enabled
     if xKeyPressed == "x"
-      stpmtr.SetDir(4,true)
-
-    if xKeyPressed == "3"
-      if stpmtr.Running(1)
-        stpmtr.SetSpeedFast(1,false)
-        stpmtr.SetRun(1,true)
-      else
-        stpmtr.SetRun(1,false)
-    if xKeyPressed == "e"
-      if stpmtr.Running(2)
-        stpmtr.SetSpeedFast(2,false)
-        stpmtr.SetRun(2,true)
-      else
-        stpmtr.SetRun(2,false)
-    if xKeyPressed == "d"
-      if stpmtr.Running(3)
-        stpmtr.SetSpeedFast(3,false)
-        stpmtr.SetRun(3,true)
-      else
-        stpmtr.SetRun(3,false)
-    if xKeyPressed == "c"
-      if stpmtr.Running(4)
-        stpmtr.SetSpeedFast(4,false)
-        stpmtr.SetRun(4,true)
-      else
-        stpmtr.SetRun(4,false)
+      stpmtr.Enable(4,NOT M4Enabled)
+      M4Enabled := NOT M4Enabled
    
+    if xKeyPressed == "3"
+        stpmtr.SetHomePosition(1,1111)
+    if xKeyPressed == "e"
+        stpmtr.SetHomePosition(2,2222)
+    if xKeyPressed == "d"
+        stpmtr.SetHomePosition(3,3333)
+    if xKeyPressed == "c"
+        stpmtr.SetHomePosition(4,4444)
+
     if xKeyPressed == "4"
-        stpmtr.SetSpeedFast(1,true)
+        stpmtr.SetWantedPosition(1,1234)
+        M1WntPos := 1234
     if xKeyPressed == "r"
-        stpmtr.SetSpeedFast(2,true)
+        stpmtr.SetWantedPosition(2,2345)
+        M2WntPos := 2345
     if xKeyPressed == "f"
-        stpmtr.SetSpeedFast(3,true)
+        stpmtr.SetWantedPosition(3,3456)
+        M3WntPos := 3456
     if xKeyPressed == "v"
-        stpmtr.SetSpeedFast(4,true)
+        stpmtr.SetWantedPosition(4,4567)
+        M4WntPos := 4567
    
     if xKeyPressed == "5"
-        stpmtr.SetSpeedFast(1,false)
+        stpmtr.SetMaxCount(1,2)
     if xKeyPressed == "t"
-        stpmtr.SetSpeedFast(2,false)
+        stpmtr.SetMaxCount(2,2)
     if xKeyPressed == "g"
-        stpmtr.SetSpeedFast(3,false)
+        stpmtr.SetMaxCount(3,2)
     if xKeyPressed == "b"
-        stpmtr.SetSpeedFast(4,false)
+        stpmtr.SetMaxCount(4,2)
+
+    if xKeyPressed == "6"
+        stpmtr.SetMaxCount(1,4)
+    if xKeyPressed == "y"
+        stpmtr.SetMaxCount(2,4)
+    if xKeyPressed == "h"
+        stpmtr.SetMaxCount(3,4)
+    if xKeyPressed == "n"
+        stpmtr.SetMaxCount(4,4)
+
+    if xKeyPressed == "7"
+        stpmtr.JogForward(1,not M1JogForward)
+        M1JogForward := not M1JogForward
+
+    if xKeyPressed == "8"
+        stpmtr.JogBackward(1,not M1JogBackward)
+        M1JogBackward := not M1JogBackward
 
 DAT
 

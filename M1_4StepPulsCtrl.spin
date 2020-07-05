@@ -11,7 +11,7 @@
 '*                         
 '* HW Inputs      -         
 '*                                                         
-'* HW Outputs     outa          b[m+0]                  StepMotor direction 
+'* HW Outputs     outa          b[m+0]                  StepMotor direction ( backward )
 '*                              b[m+1]                  StepMotor Puls   
 '*
 '* Parameters in  hubM1_4Ctrl.  b[n+0]                  (internal used) pulscontrol backward                             
@@ -19,8 +19,9 @@
 '*                              b[n+2]                  Mx auto mode (not manual mode)                             
 '*                              b[n+3]                  Mx enable control
 '*                              b[n+4]                  Mx Set home position 
-'*                              b[n+5]                  Mx jog forward 
-'*                              b[n+6]                  Mx jog backward 
+'*                              b[n+5]                  Mx Set wanted position 
+'*                              b[n+6]                  Mx jog forward 
+'*                              b[n+7]                  Mx jog backward 
 '*                hubMxMaxCount                         Mx delay next puls 
 '*                hubMxWntPos                           Mx wanted position
 '*                hubMxHomePos                          Mx home position 
@@ -53,68 +54,104 @@ VAR
 byte byCogID                 
  
 PUB StartM1_M4(x)
-  ''Stp
   byCogID := cognew (@entry,0)
 
-PUB SetRun(x, Run)
-  if Run
+PUB AutoMode(x, Auto)
+  if Auto
     case x
-      1: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b1  
-      2: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b9
-      3: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b17
-      4: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b25
+      1: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b2  
+      2: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b10
+      3: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b18
+      4: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b26
   else
     case x
-      1: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b1  
-      2: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b9
-      3: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b17
-      4: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b25
+      1: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b2  
+      2: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b10
+      3: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b18
+      4: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b26
 
-PUB SetSpeedFast (x, Fast)
-  if Fast
+PUB Enable(x, Enab)
+  if Enab
     case x
-      1: long[hubM1MaxCount] := 2
-      2: long[hubM2MaxCount] := 2
-      3: long[hubM3MaxCount] := 2
-      4: long[hubM4MaxCount] := 2
+      1: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b3  
+      2: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b11
+      3: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b19
+      4: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b27
   else
     case x
-      1: long[hubM1MaxCount] := 4  
-      2: long[hubM2MaxCount] := 4  
-      3: long[hubM3MaxCount] := 4  
-      4: long[hubM4MaxCount] := 4  
+      1: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b3  
+      2: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b11
+      3: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b19
+      4: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b27
 
-PUB SetDir (x, Dir)
-  if Dir
+PUB SetHomePosition (x, Pos)
+
     case x
-      1: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b0  
-      2: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b8
-      3: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b16
-      4: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b24
+      1: long[hubM1HomePos] := Pos
+         long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b4
+      2: long[hubM2HomePos] := Pos  
+         long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b12
+      3: long[hubM3HomePos] := Pos  
+         long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b20
+      4: long[hubM4HomePos] := Pos  
+         long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b28
+
+PUB SetWantedPosition (x, Pos)
+
+    case x
+      1: long[hubM1WntPos] := Pos
+         long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b5
+      2: long[hubM2WntPos] := Pos  
+         long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b13
+      3: long[hubM3WntPos] := Pos  
+         long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b21
+      4: long[hubM4WntPos] := Pos  
+         long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b29
+
+PUB JogForward (x, Jog)
+  if Jog
+    case x
+      1: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b6  
+      2: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b14
+      3: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b22
+      4: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b30
   else
     case x
-      1: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b0  
-      2: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b8
-      3: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b16
-      4: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b24
+      1: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b6  
+      2: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b14
+      3: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b22
+      4: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b30
+
+PUB JogBackward (x, Jog)
+  if Jog
+    case x
+      1: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b7  
+      2: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b15
+      3: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b23
+      4: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b31
+  else
+    case x
+      1: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b7  
+      2: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b15
+      3: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b23
+      4: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b31
+
+PUB SetMaxCount (x, count)
+    case x
+      1: long[hubM1MaxCount] := count
+      2: long[hubM2MaxCount] := count
+      3: long[hubM3MaxCount] := count
+      4: long[hubM4MaxCount] := count
 
 
-
-PUB M_SetPosition (Pos)
-  long[hubM1ActPos] := Pos                               
-  
 PUB ExecuteTime
   return long[hubExecTime]
 
 PUB LoopCount
   return long[hubExecCounter]
 
-PUB Exec(x)
-  case x
-    1: return long[hubM1_4Stat] & b1 == b1  
-    2: return long[hubM1_4Stat] & b9 == b9 
-    3: return long[hubM1_4Stat] & b17 == b17 
-    4: return long[hubM1_4Stat] & b25 == b25 
+PUB Stat
+  return long[hubM1_4Stat]  
 
 PUB Direction(x)
   case x
@@ -123,12 +160,33 @@ PUB Direction(x)
     3: return long[hubM1_4Stat] & b16 == b16 
     4: return long[hubM1_4Stat] & b24 == b24 
 
+PUB Pulsing(x)
+  case x
+    1: return long[hubM1_4Stat] & b1 == b1  
+    2: return long[hubM1_4Stat] & b9 == b9 
+    3: return long[hubM1_4Stat] & b17 == b17 
+    4: return long[hubM1_4Stat] & b25 == b25 
+
+PUB AtPosition(x)
+  case x
+    1: return long[hubM1_4Stat] & b2 == b2  
+    2: return long[hubM1_4Stat] & b10 == b10 
+    3: return long[hubM1_4Stat] & b18 == b18 
+    4: return long[hubM1_4Stat] & b26 == b26 
+
 PUB ActualPosition(x)
   case x
     1: return long[hubM1ActPos]
     2: return long[hubM2ActPos]
     3: return long[hubM3ActPos]
     4: return long[hubM4ActPos]
+
+PUB WantedPosition(x)
+  case x
+    1: return long[hubM1WntPos]
+    2: return long[hubM2WntPos]
+    3: return long[hubM3WntPos]
+    4: return long[hubM4WntPos]
 
 PUB ActualCount (x)
   case x
@@ -143,7 +201,6 @@ PUB MaxCount (x)
     2: return long[hubM2MaxCount]
     3: return long[hubM3MaxCount]
     4: return long[hubM4MaxCount]
-
 DAT
 'Initialisation
 Entry                   mov     dira,           #%11111111
@@ -169,56 +226,60 @@ mainloop                waitcnt lgTime,         lgDelay
                         rdlong  lgM2MaxCount,   hubM2MaxCount
                         rdlong  lgM3MaxCount,   hubM3MaxCount
                         rdlong  lgM4MaxCount,   hubM4MaxCount
-                        rdlong  lgM1HomePos,    hubM1HomePos
-                        rdlong  lgM2HomePos,    hubM2HomePos
-                        rdlong  lgM3HomePos,    hubM3HomePos
-                        rdlong  lgM4HomePos,    hubM4HomePos
 
-
-'Set direction
-
-                        andn    lgMCtrl,        b0                 'Forward := false
-                        cmps    lgM1ActPos,     lgM1EndPos  wc,wz 'Ist > Soll
-              if_a      or      lgMCtrl,        b0                 'Forward := true
-                        test    lgM1_4Ctrl,     b6 wz
-              if_nz     or      lgMCtrl,        b0                 'Forward := true
-
-
-'Set Enable
+                        test    lgM1_4Ctrl,     b4
+              if_nz     rdlong  lgM1ActPos,     hubM1HomePos 
+              if_nz     andn    lgM1_4Ctrl,     b4
 
 
 
+                        test    lgM1_4Ctrl,     b5
+              if_nz     rdlong  lgM1WntPos,     hubM1WntPos 
+              if_nz     andn    lgM1_4Ctrl,     b5
 
+                          
 
-
-'                   if jog backward OR actpos-endpos <0
-
-
-
-
-
-
-   ''                     cmps    lgM1ActPos, lgM1EndPos  wc,wz 'Ist < Soll
- 
-
-     ''                   cmps    lgM1ActPos, lgM1EndPos  wc,wz 'Ist > Soll 
-       ''       if_a      or      lgMStat,b1                 'Backward := true
- 
-
-
-
-
-
-
-
-
+M1_RS_Dir               andn    lgM1_4Ctrl,     b0                              'Backward := false
+                        test    lgM1_4Ctrl,     b2 wz                           'if auto mode
+              if_z      jmp     #M1_DirManual                                   'then is manual
                         
+                        cmps    lgM1ActPos,     lgM1WntPos  wc,wz               'Ist > Soll
+              if_a      or      lgM1_4Ctrl,     b0                              'then Backward := true
+                        jmp     #M1_RS_Enable
 
-' Direction control
-                        test    lgM1_4Ctrl,     b0    wz
+M1_DirManual            test    lgM1_4Ctrl,     b7 wz                           'else if Jog backward
+              if_nz     or      lgM1_4Ctrl,     b0                              'then BackWard := true
+
+
+
+
+
+M1_RS_Enable            andn    lgM1_4Ctrl,     b1                              'Enable := false
+                        test    lgM1_4Ctrl,     b2 wz                           'if mode manual mode
+              if_nz     jmp     #M1_Auto                                        'is manual
+M1_Manual               test    lgM1_4Ctrl,     b6 wz                           'then Enable = jogforward or jogbackward
+              if_nz     or      lgM1_4Ctrl,     b1
+                        test    lgM1_4Ctrl,     b7 wz
+              if_nz     or      lgM1_4Ctrl,     b1
+
+                        jmp     #M2_RS_Dir
+M1_Auto                 cmp     lgM1ActPos,     lgM1WntPos  wz                   ''if actual <> wanted position
+              if_z      jmp     #DirectionControl
+                        test    lgM1_4Ctrl,     b2                               ''and enabled
+                        muxnz   lgM1_4Ctrl,     b1
+
+M2_RS_Dir
+
+M5_RS_Dir
+
+
+
+
+
+DirectionControl        test    lgM1_4Ctrl,     b0    wz
                         muxnz   outa,           b0                        
                         muxnz   lgM1_4Stat,     b0 
-
+{{
                         test    lgM1_4Ctrl,     b8    wz
                         muxnz   outa,           b2                        
                         muxnz   lgM1_4Stat,     b8 
@@ -230,32 +291,32 @@ mainloop                waitcnt lgTime,         lgDelay
                         test    lgM1_4Ctrl,     b24   wz
                         muxnz   outa,           b6
                         muxnz   lgM1_4Stat,     b24 
-
+}}
 ' Puls control  
 
-M1                      test    lgM1_4Ctrl,     b1 wz
-                        muxnz   lgM1_4Stat,     b1 
+M1                      test    lgM1_4Ctrl,     b1 wz                           'if enabled 
+                        muxnz   lgM1_4Stat,     b1                              'set status pulsing
               if_z      jmp     #M1Stop
               
                         cmp     lgM1ActCount,   #0 wz    
               if_nz     jmp     #M1PulsOff 
-M1PulsOn                or      outa,           b1
-                        test    lgM1_4Ctrl,     b1    wz
+M1PulsOn                or      outa,           b1                              'set puls
+                        test    lgM1_4Ctrl,     b0 wz
               if_z      add     lgM1ActPos,     #1
               if_nz     sub     lgM1ActPos,     #1
                         jmp     #M1ActCount
                         
-M1PulsOff               andn    outa,           b1
-
+M1PulsOff               andn    outa,           b1                              'reset puls                               
+                                                                                
 M1ActCount              add     lgM1ActCount,   #1                      
                         jmp     #M2                 
 
-M1Stop                  andn    outa,           b1
+M1Stop                  andn    outa,           b1                              'reset puls          
                         mov     lgM1ActCount,   #0
 
 
 
-M2                      test    lgM1_4Ctrl,     b9 wz
+M2 {{                      test    lgM1_4Ctrl,     b9 wz
                         muxnz   lgM1_4Stat,     b9 
               if_z      jmp     #M2Stop
               
@@ -318,35 +379,50 @@ M4ActCount              add     lgM4ActCount,   #1
 M4Stop                  andn    outa,           b7
                         mov     lgM4ActCount,   #0
 
-
+}}
 Mend
+
+                        cmp     lgM1ActPos,     lgM1WntPos  wz                   ''if actual == wanted position
+                        muxz    lgM1_4Stat,     b2 
+
+
+
+                        test    lgM1_4Ctrl,     b0 wz
+                        muxnz   outa,b2
+                        test    lgM1_4Ctrl,     b1 wz
+                        muxnz   outa,b3
+                        test    lgM1_4Ctrl,     b4 wz
+                        muxnz   outa,b4
+                        test    lgM1_4Ctrl,     b5 wz
+                        muxnz   outa,b5
+                        
 'Check actual counters
                         cmp     lgM1ActCount,   lgM1MaxCount wc
               if_nc     mov     lgM1ActCount,   #0              
-                        cmp     lgM2ActCount,   lgM2MaxCount wc
+{{                        cmp     lgM2ActCount,   lgM2MaxCount wc
               if_nc     mov     lgM2ActCount,   #0              
                         cmp     lgM3ActCount,   lgM3MaxCount wc
               if_nc     mov     lgM3ActCount,   #0              
                         cmp     lgM4ActCount,   lgM4MaxCount wc
               if_nc     mov     lgM4ActCount,   #0              
-
+}}
 'Write Values   
                         wrlong  lgM1_4Stat,     hubM1_4Stat
+
                         wrlong  lgM1ActPos,     hubM1ActPos
-                        wrlong  lgM2ActPos,     hubM2ActPos
+{{                        wrlong  lgM2ActPos,     hubM2ActPos
                         wrlong  lgM3ActPos,     hubM3ActPos
                         wrlong  lgM4ActPos,     hubM4ActPos
-
+}}
                         wrlong  lgM1ActCount,   hubM1ActCount
-                        wrlong  lgM2ActCount,   hubM2ActCount
+{{                        wrlong  lgM2ActCount,   hubM2ActCount
                         wrlong  lgM3ActCount,   hubM3ActCount
                         wrlong  lgM4ActCount,   hubM4ActCount
-                        
+}}                        
                         wrlong  lgExecCounter,  hubExecCounter
 
 'Calculate executing time   
-                        mov     lgEndTime,      cnt
-                        mov     lgExecTime,     lgEndTime
+                        mov     lgExecTime,     cnt
                         sub     lgExecTime,     lgStartTime
                         wrlong  lgExecTime,     hubExecTime
 
@@ -374,12 +450,30 @@ b7                      long $80
 
 b8                      long $100
 b9                      long $200
+b10                     long $400
+b11                     long $800
+b12                     long $1000
+b13                     long $2000
+b14                     long $4000
+b15                     long $8000
 
 b16                     long $10000
 b17                     long $20000
+b18                     long $40000
+b19                     long $80000
+b20                     long $100000
+b21                     long $200000
+b22                     long $400000
+b23                     long $800000
 
 b24                     long $1000000
 b25                     long $2000000
+b26                     long $4000000
+b27                     long $8000000
+b28                     long $10000000
+b29                     long $20000000
+b30                     long $40000000
+b31                     long $80000000
 
 hubM1_4Ctrl             long $7000
 hubM1_4Stat             long $7004
@@ -394,10 +488,10 @@ hubM2ActPos             long $7024
 hubM3ActPos             long $7028
 hubM4ActPos             long $702C
 
-hubM1EndPos             long $7060
-hubM2EndPos             long $7064
-hubM3EndPos             long $7068
-hubM4EndPos             long $706C
+hubM1WntPos             long $7060
+hubM2WntPos             long $7064
+hubM3WntPos             long $7068
+hubM4WntPos             long $706C
 
 hubM1ActCount           long $7030
 hubM2ActCount           long $7034
@@ -427,7 +521,7 @@ lgM2ActPos              res
 lgM3ActPos              res
 lgM4ActPos              res
 
-lgM1EndPos              res
+lgM1WntPos              res
 lgM2EndPos              res
 lgM3EndPos              res
 lgM4EndPos              res
@@ -442,7 +536,7 @@ lgM2MaxCount            res
 lgM3MaxCount            res
 lgM4MaxCount            res
 
-lgExecTime              res
 lgTime                  res
+
+lgExecTime              res
 lgStartTime             res
-lgEndTime               res
