@@ -265,7 +265,7 @@ M1_Manual               test    lgM1_4Ctrl,     b6 wz                           
                         jmp     #M2_RS_Dir
 M1_Auto                 cmp     lgM1ActPos,     lgM1WntPos  wz                   ''if actual <> wanted position
               if_z      jmp     #DirectionControl
-                        test    lgM1_4Ctrl,     b2                               ''and enabled
+                        test    lgM1_4Ctrl,     b3                               ''and enabled
                         muxnz   lgM1_4Ctrl,     b1
 
 M2_RS_Dir
@@ -309,14 +309,17 @@ M1PulsOn                or      outa,           b1                              
 M1PulsOff               andn    outa,           b1                              'reset puls                               
                                                                                 
 M1ActCount              add     lgM1ActCount,   #1                      
-                        jmp     #M2                 
+                        jmp     #M1End                 
 
 M1Stop                  andn    outa,           b1                              'reset puls          
                         mov     lgM1ActCount,   #0
 
+M1End                   test    lgM1_4Ctrl,     b2 wz                           'if manual mode
+              if_z      mov     lgM1WntPos,     lgM1ActPos                      'then wntpos = actpos
 
 
-M2 {{                      test    lgM1_4Ctrl,     b9 wz
+
+ {{                      test    lgM1_4Ctrl,     b9 wz
                         muxnz   lgM1_4Stat,     b9 
               if_z      jmp     #M2Stop
               
@@ -414,6 +417,8 @@ Mend
                         wrlong  lgM3ActPos,     hubM3ActPos
                         wrlong  lgM4ActPos,     hubM4ActPos
 }}
+                        wrlong  lgM1WntPos,     hubM1WntPos
+
                         wrlong  lgM1ActCount,   hubM1ActCount
 {{                        wrlong  lgM2ActCount,   hubM2ActCount
                         wrlong  lgM3ActCount,   hubM3ActCount
