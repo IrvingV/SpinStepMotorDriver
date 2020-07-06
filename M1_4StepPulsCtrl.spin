@@ -227,15 +227,17 @@ mainloop                waitcnt lgTime,         lgDelay
                         rdlong  lgM3MaxCount,   hubM3MaxCount
                         rdlong  lgM4MaxCount,   hubM4MaxCount
 
-                        test    lgM1_4Ctrl,     b4
+                        test    lgM1_4Ctrl,     b4 wz
               if_nz     rdlong  lgM1ActPos,     hubM1HomePos 
               if_nz     andn    lgM1_4Ctrl,     b4
+              if_nz     wrlong  lgM1_4Ctrl,     hubM1_4Ctrl
 
 
 
-                        test    lgM1_4Ctrl,     b5
+                        test    lgM1_4Ctrl,     b5 wz
               if_nz     rdlong  lgM1WntPos,     hubM1WntPos 
               if_nz     andn    lgM1_4Ctrl,     b5
+              if_nz     wrlong  lgM1_4Ctrl,     hubM1_4Ctrl
 
                           
 
@@ -257,15 +259,16 @@ M1_DirManual            test    lgM1_4Ctrl,     b7 wz                           
 M1_RS_Enable            andn    lgM1_4Ctrl,     b1                              'Enable := false
                         test    lgM1_4Ctrl,     b2 wz                           'if mode manual mode
               if_nz     jmp     #M1_Auto                                        'is manual
+
 M1_Manual               test    lgM1_4Ctrl,     b6 wz                           'then Enable = jogforward or jogbackward
               if_nz     or      lgM1_4Ctrl,     b1
                         test    lgM1_4Ctrl,     b7 wz
               if_nz     or      lgM1_4Ctrl,     b1
-
                         jmp     #M2_RS_Dir
+
 M1_Auto                 cmp     lgM1ActPos,     lgM1WntPos  wz                   ''if actual <> wanted position
               if_z      jmp     #DirectionControl
-                        test    lgM1_4Ctrl,     b3                               ''and enabled
+                        test    lgM1_4Ctrl,     b3 wz                               ''and enabled
                         muxnz   lgM1_4Ctrl,     b1
 
 M2_RS_Dir
@@ -389,7 +392,7 @@ Mend
                         muxz    lgM1_4Stat,     b2 
 
 
-
+{{
                         test    lgM1_4Ctrl,     b0 wz
                         muxnz   outa,b2
                         test    lgM1_4Ctrl,     b1 wz
@@ -398,6 +401,7 @@ Mend
                         muxnz   outa,b4
                         test    lgM1_4Ctrl,     b5 wz
                         muxnz   outa,b5
+                        }}
                         
 'Check actual counters
                         cmp     lgM1ActCount,   lgM1MaxCount wc

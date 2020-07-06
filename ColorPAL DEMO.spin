@@ -43,6 +43,7 @@ VAR
   long M3JogBackward
   long M4JogBackward
   byte i
+  byte j
  
 PRI PrnXyDec(x,y,d)
   pc.Position(x,y)
@@ -136,6 +137,8 @@ PUB Main
    
     if xKeyPressed == "3"
         stpmtr.SetHomePosition(1,1111)
+        j++
+        PrnXyDec(60, 15, j) 
     if xKeyPressed == "e"
         stpmtr.SetHomePosition(2,2222)
     if xKeyPressed == "d"
