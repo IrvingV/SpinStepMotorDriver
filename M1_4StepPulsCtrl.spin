@@ -262,6 +262,7 @@ mainloop                waitcnt lgTime,         lgDelay
               if_nz     andn    lgM1_4Ctrl,     b29
               if_nz     wrlong  lgM1_4Ctrl,     hubM1_4Ctrl
 
+'M1
 M1_RS_Dir               andn    lgM1_4Mem,      b0                              'Backward := false
                         test    lgM1_4Ctrl,     b2 wz                           'if auto mode
               if_z      jmp     #M1_DirManual                                   'then is manual
@@ -288,8 +289,9 @@ M1_Auto                 cmp     lgM1ActPos,     lgM1WntPos  wz                  
                         test    lgM1_4Ctrl,     b3 wz                           'and enabled
                         muxnz   lgM1_4Mem,      b1
 
+'M2
 M2_RS_Dir               andn    lgM1_4Mem,      b8                              'Backward := false
-                        test    lgM1_4Ctrl,     b10 wz                           'if auto mode
+                        test    lgM1_4Ctrl,     b10 wz                          'if auto mode
               if_z      jmp     #M2_DirManual                                   'then is manual
                         
                         cmps    lgM2ActPos,     lgM2WntPos  wc,wz               'Ist > Soll
@@ -297,11 +299,11 @@ M2_RS_Dir               andn    lgM1_4Mem,      b8                              
                         jmp     #M2_RS_Enable
 
 M2_DirManual            test    lgM1_4Ctrl,     b15 wz                           'else if Jog backward
-              if_nz     or      lgM1_4Mem,      b8                              'then BackWard := true
+              if_nz     or      lgM1_4Mem,      b8                               'then BackWard := true
 
-M2_RS_Enable            andn    lgM1_4Mem,      b9                              'Enable := false
+M2_RS_Enable            andn    lgM1_4Mem,      b9                               'Enable := false
                         test    lgM1_4Ctrl,     b10 wz                           'if mode manual mode
-              if_nz     jmp     #M2_Auto                                        'is manual
+              if_nz     jmp     #M2_Auto                                         'is manual
 
 M2_Manual               test    lgM1_4Ctrl,     b14 wz                           'then Enable = jogforward or jogbackward
               if_nz     or      lgM1_4Mem,      b9
@@ -309,16 +311,17 @@ M2_Manual               test    lgM1_4Ctrl,     b14 wz                          
               if_nz     or      lgM1_4Mem,      b9
                         jmp     #M3_RS_Dir
 
-M2_Auto                 cmp     lgM2ActPos,     lgM2WntPos  wz                  'if actual <> wanted position
+M2_Auto                 cmp     lgM2ActPos,     lgM2WntPos  wz                   'if actual <> wanted position
               if_z      jmp     #M3_RS_Dir                               
                         test    lgM1_4Ctrl,     b11 wz                           'and enabled
                         muxnz   lgM1_4Mem,      b9
 
+'M3
 M3_RS_Dir               andn    lgM1_4Mem,      b16                              'Backward := false
                         test    lgM1_4Ctrl,     b18 wz                           'if auto mode
-              if_z      jmp     #M3_DirManual                                   'then is manual
+              if_z      jmp     #M3_DirManual                                    'then is manual
                         
-                        cmps    lgM3ActPos,     lgM3WntPos  wc,wz               'Ist > Soll
+                        cmps    lgM3ActPos,     lgM3WntPos  wc,wz                'Ist > Soll
               if_a      or      lgM1_4Mem,      b16                              'then Backward := true
                         jmp     #M3_RS_Enable
 
@@ -327,7 +330,7 @@ M3_DirManual            test    lgM1_4Ctrl,     b23 wz                          
 
 M3_RS_Enable            andn    lgM1_4Mem,      b17                              'Enable := false
                         test    lgM1_4Ctrl,     b18 wz                           'if mode manual mode
-              if_nz     jmp     #M3_Auto                                        'is manual
+              if_nz     jmp     #M3_Auto                                         'is manual
 
 M3_Manual               test    lgM1_4Ctrl,     b22 wz                           'then Enable = jogforward or jogbackward
               if_nz     or      lgM1_4Mem,      b17
@@ -340,6 +343,7 @@ M3_Auto                 cmp     lgM3ActPos,     lgM3WntPos  wz                  
                         test    lgM1_4Ctrl,     b19 wz                           'and enabled
                         muxnz   lgM1_4Mem,      b17
 
+'M4
 M4_RS_Dir               andn    lgM1_4Mem,      b24                              'Backward := false
                         test    lgM1_4Ctrl,     b26 wz                           'if auto mode
               if_z      jmp     #M4_DirManual                                   'then is manual
@@ -488,8 +492,8 @@ M4End                   test    lgM1_4Ctrl,     b26 wz                          
                         muxz    lgM1_4Stat,     b10 
                         cmp     lgM3ActPos,     lgM3WntPos  wz                   ''if actual == wanted position
                         muxz    lgM1_4Stat,     b18 
-                        cmp     lgM3ActPos,     lgM4WntPos  wz                   ''if actual == wanted position
-                        muxz    lgM1_4Stat,     b24 
+                        cmp     lgM4ActPos,     lgM4WntPos  wz                   ''if actual == wanted position
+                        muxz    lgM1_4Stat,     b26 
 
 'CLear actual counter when max is reached
                         cmp     lgM1ActCount,   lgM1MaxCount wc
