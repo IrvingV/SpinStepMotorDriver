@@ -14,9 +14,7 @@
 '* HW Outputs     outa          b[m+0]                  StepMotor direction ( backward )
 '*                              b[m+1]                  StepMotor Puls   
 '*
-'* Parameters in  hubM1_4Ctrl.  b[n+0]                  (internal used) pulscontrol backward                             
-'*                              b[n+1]                  (internal used) pulscontrol enable                             
-'*                              b[n+2]                  Mx auto mode (not manual mode)                             
+'* Parameters in  hubM1_4Ctrl.  b[n+2]                  Mx mode auto                             
 '*                              b[n+3]                  Mx enable control
 '*                              b[n+4]                  Mx Set home position 
 '*                              b[n+5]                  Mx Set wanted position 
@@ -26,6 +24,9 @@
 '*                hubMxWntPos                           Mx wanted position
 '*                hubMxHomePos                          Mx home position 
 '*
+'* Parameters in  lgM1_4Mem .  b[n+0]                  backward signal                             
+'*                              b[n+1]                  enable puls control                             
+'*
 '* Parameters out hubM1_4Stat   b[n+0]                  Mx direction
 '*                              b[n+1]                  Mx moving
 '*                              b[n+2]                  Mx actual position equals wanted postion
@@ -34,13 +35,13 @@
 '*                (hubExecCounter) 
 '*                (hubExecTime)
 '*
-'* Methods        Enable                                resets all ctrl bits
-'*                SetPosition(position [steps])         change actual position (sollwert := istwert)
-'*                SetSpeed(speed [steppulses/sec])      change puls delay
-'*                JogForward                            set/reset move Forward               
-'*                JogBackward                           set/reset move Backward 
-'*                SetWantedPosion
-'*                Enable                                set/reset enable
+'* Methods        AutoMode(x, Auto)                     Set/reset auto mode
+'*                Enable(x, Enab)                       Set/reset enable mode
+'*                SetHomePosition(x, Pos)               Set homeposition
+'*                SetWantedPosition                     Set wanted position
+'*                JogForward                            Set/reset move forward               
+'*                JogBackward                           Set/reset move backward 
+'*                SetMaxcount                           Set wanted cycle time (speed)
 '*
 '***************************************************************************************************
 
@@ -231,80 +232,168 @@ mainloop                waitcnt lgTime,         lgDelay
               if_nz     rdlong  lgM1ActPos,     hubM1HomePos 
               if_nz     andn    lgM1_4Ctrl,     b4
               if_nz     wrlong  lgM1_4Ctrl,     hubM1_4Ctrl
-
-
+                        test    lgM1_4Ctrl,     b12 wz
+              if_nz     rdlong  lgM2ActPos,     hubM2HomePos 
+              if_nz     andn    lgM1_4Ctrl,     b12
+              if_nz     wrlong  lgM1_4Ctrl,     hubM1_4Ctrl
+                        test    lgM1_4Ctrl,     b20 wz
+              if_nz     rdlong  lgM3ActPos,     hubM3HomePos 
+              if_nz     andn    lgM1_4Ctrl,     b20
+              if_nz     wrlong  lgM1_4Ctrl,     hubM1_4Ctrl
+                        test    lgM1_4Ctrl,     b28 wz
+              if_nz     rdlong  lgM4ActPos,     hubM4HomePos 
+              if_nz     andn    lgM1_4Ctrl,     b28
+              if_nz     wrlong  lgM1_4Ctrl,     hubM1_4Ctrl
 
                         test    lgM1_4Ctrl,     b5 wz
               if_nz     rdlong  lgM1WntPos,     hubM1WntPos 
               if_nz     andn    lgM1_4Ctrl,     b5
               if_nz     wrlong  lgM1_4Ctrl,     hubM1_4Ctrl
+                        test    lgM1_4Ctrl,     b13 wz
+              if_nz     rdlong  lgM2WntPos,     hubM2WntPos 
+              if_nz     andn    lgM1_4Ctrl,     b13
+              if_nz     wrlong  lgM1_4Ctrl,     hubM1_4Ctrl
+                        test    lgM1_4Ctrl,     b21 wz
+              if_nz     rdlong  lgM3WntPos,     hubM3WntPos 
+              if_nz     andn    lgM1_4Ctrl,     b21
+              if_nz     wrlong  lgM1_4Ctrl,     hubM1_4Ctrl
+                        test    lgM1_4Ctrl,     b29 wz
+              if_nz     rdlong  lgM4WntPos,     hubM4WntPos 
+              if_nz     andn    lgM1_4Ctrl,     b29
+              if_nz     wrlong  lgM1_4Ctrl,     hubM1_4Ctrl
 
-                          
-
-M1_RS_Dir               andn    lgM1_4Ctrl,     b0                              'Backward := false
+M1_RS_Dir               andn    lgM1_4Mem,      b0                              'Backward := false
                         test    lgM1_4Ctrl,     b2 wz                           'if auto mode
               if_z      jmp     #M1_DirManual                                   'then is manual
                         
                         cmps    lgM1ActPos,     lgM1WntPos  wc,wz               'Ist > Soll
-              if_a      or      lgM1_4Ctrl,     b0                              'then Backward := true
+              if_a      or      lgM1_4Mem,      b0                              'then Backward := true
                         jmp     #M1_RS_Enable
 
 M1_DirManual            test    lgM1_4Ctrl,     b7 wz                           'else if Jog backward
-              if_nz     or      lgM1_4Ctrl,     b0                              'then BackWard := true
+              if_nz     or      lgM1_4Mem,      b0                              'then BackWard := true
 
-
-
-
-
-M1_RS_Enable            andn    lgM1_4Ctrl,     b1                              'Enable := false
+M1_RS_Enable            andn    lgM1_4Mem,      b1                              'Enable := false
                         test    lgM1_4Ctrl,     b2 wz                           'if mode manual mode
               if_nz     jmp     #M1_Auto                                        'is manual
 
 M1_Manual               test    lgM1_4Ctrl,     b6 wz                           'then Enable = jogforward or jogbackward
-              if_nz     or      lgM1_4Ctrl,     b1
+              if_nz     or      lgM1_4Mem,      b1
                         test    lgM1_4Ctrl,     b7 wz
-              if_nz     or      lgM1_4Ctrl,     b1
+              if_nz     or      lgM1_4Mem,      b1
                         jmp     #M2_RS_Dir
 
-M1_Auto                 cmp     lgM1ActPos,     lgM1WntPos  wz                   ''if actual <> wanted position
-              if_z      jmp     #DirectionControl
-                        test    lgM1_4Ctrl,     b3 wz                               ''and enabled
-                        muxnz   lgM1_4Ctrl,     b1
+M1_Auto                 cmp     lgM1ActPos,     lgM1WntPos  wz                  'if actual <> wanted position
+              if_z      jmp     #M2_RS_Dir                               
+                        test    lgM1_4Ctrl,     b3 wz                           'and enabled
+                        muxnz   lgM1_4Mem,      b1
 
-M2_RS_Dir
+M2_RS_Dir               andn    lgM1_4Mem,      b8                              'Backward := false
+                        test    lgM1_4Ctrl,     b10 wz                           'if auto mode
+              if_z      jmp     #M2_DirManual                                   'then is manual
+                        
+                        cmps    lgM2ActPos,     lgM2WntPos  wc,wz               'Ist > Soll
+              if_a      or      lgM1_4Mem,      b8                              'then Backward := true
+                        jmp     #M2_RS_Enable
 
-M5_RS_Dir
+M2_DirManual            test    lgM1_4Ctrl,     b15 wz                           'else if Jog backward
+              if_nz     or      lgM1_4Mem,      b8                              'then BackWard := true
+
+M2_RS_Enable            andn    lgM1_4Mem,      b9                              'Enable := false
+                        test    lgM1_4Ctrl,     b10 wz                           'if mode manual mode
+              if_nz     jmp     #M2_Auto                                        'is manual
+
+M2_Manual               test    lgM1_4Ctrl,     b14 wz                           'then Enable = jogforward or jogbackward
+              if_nz     or      lgM1_4Mem,      b9
+                        test    lgM1_4Ctrl,     b15 wz
+              if_nz     or      lgM1_4Mem,      b9
+                        jmp     #M3_RS_Dir
+
+M2_Auto                 cmp     lgM2ActPos,     lgM2WntPos  wz                  'if actual <> wanted position
+              if_z      jmp     #M3_RS_Dir                               
+                        test    lgM1_4Ctrl,     b11 wz                           'and enabled
+                        muxnz   lgM1_4Mem,      b9
+
+M3_RS_Dir               andn    lgM1_4Mem,      b16                              'Backward := false
+                        test    lgM1_4Ctrl,     b18 wz                           'if auto mode
+              if_z      jmp     #M3_DirManual                                   'then is manual
+                        
+                        cmps    lgM3ActPos,     lgM3WntPos  wc,wz               'Ist > Soll
+              if_a      or      lgM1_4Mem,      b16                              'then Backward := true
+                        jmp     #M3_RS_Enable
+
+M3_DirManual            test    lgM1_4Ctrl,     b23 wz                           'else if Jog backward
+              if_nz     or      lgM1_4Mem,      b16                              'then BackWard := true
+
+M3_RS_Enable            andn    lgM1_4Mem,      b17                              'Enable := false
+                        test    lgM1_4Ctrl,     b18 wz                           'if mode manual mode
+              if_nz     jmp     #M3_Auto                                        'is manual
+
+M3_Manual               test    lgM1_4Ctrl,     b22 wz                           'then Enable = jogforward or jogbackward
+              if_nz     or      lgM1_4Mem,      b17
+                        test    lgM1_4Ctrl,     b23 wz
+              if_nz     or      lgM1_4Mem,      b17
+                        jmp     #M4_RS_Dir
+
+M3_Auto                 cmp     lgM3ActPos,     lgM3WntPos  wz                  'if actual <> wanted position
+              if_z      jmp     #M4_RS_Dir                               
+                        test    lgM1_4Ctrl,     b19 wz                           'and enabled
+                        muxnz   lgM1_4Mem,      b17
+
+M4_RS_Dir               andn    lgM1_4Mem,      b24                              'Backward := false
+                        test    lgM1_4Ctrl,     b26 wz                           'if auto mode
+              if_z      jmp     #M4_DirManual                                   'then is manual
+                        
+                        cmps    lgM4ActPos,     lgM4WntPos  wc,wz               'Ist > Soll
+              if_a      or      lgM1_4Mem,      b24                              'then Backward := true
+                        jmp     #M4_RS_Enable
+
+M4_DirManual            test    lgM1_4Ctrl,     b31 wz                           'else if Jog backward
+              if_nz     or      lgM1_4Mem,      b24                              'then BackWard := true
+
+M4_RS_Enable            andn    lgM1_4Mem,      b25                              'Enable := false
+                        test    lgM1_4Ctrl,     b26 wz                           'if mode manual mode
+              if_nz     jmp     #M4_Auto                                        'is manual
+
+M4_Manual               test    lgM1_4Ctrl,     b30 wz                           'then Enable = jogforward or jogbackward
+              if_nz     or      lgM1_4Mem,      b25
+                        test    lgM1_4Ctrl,     b31 wz
+              if_nz     or      lgM1_4Mem,      b25
+                        jmp     #DirectionControl
+
+M4_Auto                 cmp     lgM4ActPos,     lgM4WntPos  wz                  'if actual <> wanted position
+              if_z      jmp     #DirectionControl                               
+                        test    lgM1_4Ctrl,     b27 wz                           'and enabled
+                        muxnz   lgM1_4Mem,      b25
 
 
 
-
-
-DirectionControl        test    lgM1_4Ctrl,     b0    wz
+DirectionControl        test    lgM1_4Mem,      b0 wz
                         muxnz   outa,           b0                        
                         muxnz   lgM1_4Stat,     b0 
-{{
-                        test    lgM1_4Ctrl,     b8    wz
+
+                        test    lgM1_4Mem,      b8 wz
                         muxnz   outa,           b2                        
                         muxnz   lgM1_4Stat,     b8 
 
-                        test    lgM1_4Ctrl,     b16   wz
+                        test    lgM1_4Mem,      b16 wz
                         muxnz   outa,           b4                        
                         muxnz   lgM1_4Stat,     b16 
 
-                        test    lgM1_4Ctrl,     b24   wz
+                        test    lgM1_4Mem,      b24 wz
                         muxnz   outa,           b6
                         muxnz   lgM1_4Stat,     b24 
-}}
-' Puls control  
 
-M1                      test    lgM1_4Ctrl,     b1 wz                           'if enabled 
+' Puls control  
+'M1
+                        test    lgM1_4Mem,      b1 wz                           'if enabled 
                         muxnz   lgM1_4Stat,     b1                              'set status pulsing
               if_z      jmp     #M1Stop
               
                         cmp     lgM1ActCount,   #0 wz    
               if_nz     jmp     #M1PulsOff 
 M1PulsOn                or      outa,           b1                              'set puls
-                        test    lgM1_4Ctrl,     b0 wz
+                        test    lgM1_4Mem,      b0 wz
               if_z      add     lgM1ActPos,     #1
               if_nz     sub     lgM1ActPos,     #1
                         jmp     #M1ActCount
@@ -320,16 +409,15 @@ M1Stop                  andn    outa,           b1                              
 M1End                   test    lgM1_4Ctrl,     b2 wz                           'if manual mode
               if_z      mov     lgM1WntPos,     lgM1ActPos                      'then wntpos = actpos
 
-
-
- {{                      test    lgM1_4Ctrl,     b9 wz
+'M2
+                        test    lgM1_4Mem,      b9 wz
                         muxnz   lgM1_4Stat,     b9 
               if_z      jmp     #M2Stop
               
                         cmp     lgM2ActCount,   #0 wz    
               if_nz     jmp     #M2PulsOff 
 M2PulsOn                or      outa,           b3
-                        test    lgM1_4Ctrl,     b8    wz
+                        test    lgM1_4Mem,      b8    wz
               if_z      add     lgM2ActPos,     #1
               if_nz     sub     lgM2ActPos,     #1
                         jmp     #M2ActCount
@@ -337,21 +425,23 @@ M2PulsOn                or      outa,           b3
 M2PulsOff               andn    outa,           b3
 
 M2ActCount              add     lgM2ActCount,   #1                      
-                        jmp     #M3                 
+                        jmp     #M2End                 
 
 M2Stop                  andn    outa,           b3
                         mov     lgM2ActCount,   #0
 
+M2End                   test    lgM1_4Ctrl,     b10 wz                           'if manual mode
+              if_z      mov     lgM2WntPos,     lgM2ActPos                      'then wntpos = actpos
 
-
-M3                      test    lgM1_4Ctrl,     b17 wz
+'M3
+                        test    lgM1_4Mem,      b17 wz
                         muxnz   lgM1_4Stat,     b17 
               if_z      jmp     #M3Stop
               
                         cmp     lgM3ActCount,   #0 wz    
               if_nz     jmp     #M3PulsOff 
 M3PulsOn                or      outa,           b5
-                        test    lgM1_4Ctrl,     b16    wz
+                        test    lgM1_4Mem,     b16    wz
               if_z      add     lgM3ActPos,     #1
               if_nz     sub     lgM3ActPos,     #1
                         jmp     #M3ActCount
@@ -359,20 +449,23 @@ M3PulsOn                or      outa,           b5
 M3PulsOff               andn    outa,           b5
 
 M3ActCount              add     lgM3ActCount,   #1                      
-                        jmp     #M4                 
+                        jmp     #M3End                 
 
 M3Stop                  andn    outa,           b5
                         mov     lgM3ActCount,   #0
 
+M3End                   test    lgM1_4Ctrl,     b18 wz                           'if manual mode
+              if_z      mov     lgM3WntPos,     lgM3ActPos                      'then wntpos = actpos
 
-M4                      test    lgM1_4Ctrl,     b25 wz
+'M4
+                        test    lgM1_4Mem,      b25 wz
                         muxnz   lgM1_4Stat,     b25 
               if_z      jmp     #M4Stop
               
                         cmp     lgM4ActCount,   #0 wz    
               if_nz     jmp     #M4PulsOff 
 M4PulsOn                or      outa,           b7
-                        test    lgM1_4Ctrl,     b24    wz
+                        test    lgM1_4Mem,      b24    wz
               if_z      add     lgM4ActPos,     #1
               if_nz     sub     lgM4ActPos,     #1
                         jmp     #M4ActCount
@@ -380,54 +473,52 @@ M4PulsOn                or      outa,           b7
 M4PulsOff               andn    outa,           b7
 
 M4ActCount              add     lgM4ActCount,   #1                      
-                        jmp     #Mend                 
+                        jmp     #M4End                 
 
 M4Stop                  andn    outa,           b7
                         mov     lgM4ActCount,   #0
 
-}}
-Mend
+M4End                   test    lgM1_4Ctrl,     b26 wz                           'if manual mode
+              if_z      mov     lgM4WntPos,     lgM4ActPos                       'then wntpos = actpos
 
+'Check actual == wanted position
                         cmp     lgM1ActPos,     lgM1WntPos  wz                   ''if actual == wanted position
                         muxz    lgM1_4Stat,     b2 
+                        cmp     lgM2ActPos,     lgM2WntPos  wz                   ''if actual == wanted position
+                        muxz    lgM1_4Stat,     b10 
+                        cmp     lgM3ActPos,     lgM3WntPos  wz                   ''if actual == wanted position
+                        muxz    lgM1_4Stat,     b18 
+                        cmp     lgM3ActPos,     lgM4WntPos  wz                   ''if actual == wanted position
+                        muxz    lgM1_4Stat,     b24 
 
-
-{{
-                        test    lgM1_4Ctrl,     b0 wz
-                        muxnz   outa,b2
-                        test    lgM1_4Ctrl,     b1 wz
-                        muxnz   outa,b3
-                        test    lgM1_4Ctrl,     b4 wz
-                        muxnz   outa,b4
-                        test    lgM1_4Ctrl,     b5 wz
-                        muxnz   outa,b5
-                        }}
-                        
-'Check actual counters
+'CLear actual counter when max is reached
                         cmp     lgM1ActCount,   lgM1MaxCount wc
               if_nc     mov     lgM1ActCount,   #0              
-{{                        cmp     lgM2ActCount,   lgM2MaxCount wc
+                        cmp     lgM2ActCount,   lgM2MaxCount wc
               if_nc     mov     lgM2ActCount,   #0              
                         cmp     lgM3ActCount,   lgM3MaxCount wc
               if_nc     mov     lgM3ActCount,   #0              
                         cmp     lgM4ActCount,   lgM4MaxCount wc
               if_nc     mov     lgM4ActCount,   #0              
-}}
+
 'Write Values   
                         wrlong  lgM1_4Stat,     hubM1_4Stat
 
                         wrlong  lgM1ActPos,     hubM1ActPos
-{{                        wrlong  lgM2ActPos,     hubM2ActPos
+                        wrlong  lgM2ActPos,     hubM2ActPos
                         wrlong  lgM3ActPos,     hubM3ActPos
                         wrlong  lgM4ActPos,     hubM4ActPos
-}}
+
                         wrlong  lgM1WntPos,     hubM1WntPos
+                        wrlong  lgM2WntPos,     hubM2WntPos
+                        wrlong  lgM3WntPos,     hubM3WntPos
+                        wrlong  lgM4WntPos,     hubM4WntPos
 
                         wrlong  lgM1ActCount,   hubM1ActCount
-{{                        wrlong  lgM2ActCount,   hubM2ActCount
+                        wrlong  lgM2ActCount,   hubM2ActCount
                         wrlong  lgM3ActCount,   hubM3ActCount
                         wrlong  lgM4ActCount,   hubM4ActCount
-}}                        
+                        
                         wrlong  lgExecCounter,  hubExecCounter
 
 'Calculate executing time   
@@ -518,6 +609,7 @@ hubExecCounter          long $7054
 lgExecCounter           res
 
 lgM1_4Ctrl              res
+lgM1_4Mem               res
 lgM1_4Stat              res
 
 lgM1HomePos             res
@@ -531,9 +623,9 @@ lgM3ActPos              res
 lgM4ActPos              res
 
 lgM1WntPos              res
-lgM2EndPos              res
-lgM3EndPos              res
-lgM4EndPos              res
+lgM2WntPos              res
+lgM3WntPos              res
+lgM4WntPos              res
 
 lgM1ActCount            res
 lgM2ActCount            res
