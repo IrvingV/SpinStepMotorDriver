@@ -24,16 +24,16 @@
 '*                hubMxWntPos                           Mx wanted position
 '*                hubMxHomePos                          Mx home position 
 '*
-'* Parameters in  lgM1_4Mem .  b[n+0]                  backward signal                             
+'* memory bits   lgM1_4Mem.     b[n+0]                  backward signal                             
 '*                              b[n+1]                  enable puls control                             
 '*
 '* Parameters out hubM1_4Stat   b[n+0]                  Mx direction
 '*                              b[n+1]                  Mx moving
 '*                              b[n+2]                  Mx actual position equals wanted postion
 '*                hubMxActPos                           Mx actual position
-'*                (hubMxActCount)                       
-'*                (hubExecCounter) 
-'*                (hubExecTime)
+'*               (hubMxActCount)                       
+'*               (hubExecCounter) 
+'*               (hubExecTime)
 '*
 '* Methods        AutoMode(x, Auto)                     Set/reset auto mode
 '*                Enable(x, Enab)                       Set/reset enable mode
@@ -70,6 +70,7 @@ PUB AutoMode(x, Auto)
       2: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b10
       3: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b18
       4: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b26
+  return(Auto)      
 
 PUB Enable(x, Enab)
   if Enab
@@ -84,6 +85,7 @@ PUB Enable(x, Enab)
       2: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b11
       3: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b19
       4: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b27
+  return(Enab)      
 
 PUB SetHomePosition (x, Pos)
 
@@ -110,7 +112,7 @@ PUB SetWantedPosition (x, Pos)
          long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b29
 
 PUB JogForward (x, Jog)
-  if Jog
+  if Jog > 0
     case x
       1: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b6  
       2: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b14
@@ -124,7 +126,7 @@ PUB JogForward (x, Jog)
       4: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b30
 
 PUB JogBackward (x, Jog)
-  if Jog
+  if Jog  == true
     case x
       1: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b7  
       2: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b15

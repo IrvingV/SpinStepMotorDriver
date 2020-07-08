@@ -18,11 +18,12 @@ CON
   _xinfreq      = 5_000_000
   
 OBJ
+  stpmtr        : "M1_4StepPulsCtrl"
 
 VAR
 
 byte xEnable[5]
-byte xRun[5]
+byte xStartMove[5]
 byte xRunning[5]
 byte xShort[5]
 byte xTriangle[5]
@@ -61,6 +62,64 @@ PUB Start
   byCogID1 := cognew (MotionLoop,0)
 
 
+PUB AutoMode(x, Auto)
+  return stpmtr.Automode(x,Auto)      
+
+PUB Enable(x, Enab)
+  return stpmtr.Enable(x,Enab)      
+
+PUB SetHomePosition(x, Pos)
+  stpmtr.SetHomePosition(x, Pos)      
+
+PUB SetWantedPosition(x, Pos)
+  stpmtr.SetWantedPosition(x,Pos)      
+
+PUB JogForward(x, Jog)
+  stpmtr.JogForward(x, Jog)       
+
+PUB JogBackward(x, Jog)
+  stpmtr.JogBackward(x, Jog)
+  
+PUB SetMaxCount(x, count)
+  stpmtr.SetMaxCount(x, count)
+
+PUB ExecuteTime
+  return stpmtr.ExecuteTime
+
+PUB LoopCount
+  return stpmtr.LoopCount
+
+PUB Stat
+  return stpmtr.Stat  
+
+PUB Direction(x)
+  return stpmtr.Direction(x)
+
+
+PUB Pulsing(x)
+  return stpmtr.Pulsing(x)
+  
+
+PUB AtPosition(x)
+  return stpmtr.AtPosition(x)
+  
+
+PUB ActualPosition(x)
+  return stpmtr.ActualPosition(x)
+ 
+
+PUB WantedPosition(x)
+  return stpmtr.WantedPosition(x)
+ 
+
+PUB ActualCount(x)
+  return stpmtr.ActualCount(x)
+ 
+
+PUB MaxCount(x)
+  return stpmtr.MaxCount(x)
+
+
 PUB MotionLoop
 
   'Parameters
@@ -73,8 +132,7 @@ PUB MotionLoop
   case byState[i]
 
     0:
-      IF xRun[i]
-        xRun[i] := FALSE
+      IF xStartMove[i]
         xRunning[i] := TRUE
 
         byState[i] := 1
@@ -86,7 +144,7 @@ PUB MotionLoop
 
       x1 := ( woSpeed[i] * woSpeed[i] ) / (2 * lgAcc[i] ) 
       x2 := ( woSpeed[i] * woSpeed[i] ) / (2 * lgDec[i] ) 
-      if  ( lgSollPos[i] - long[hubActPos+(i-1)*4] ) =< ( x1 + x2 )
+      if  ( lgSollPos[i] - stpmtr.ActualPosition(i) ) =< ( x1 + x2 )
         xShort[5] := true
 
       ''if woCalcSpeed[i] <   
