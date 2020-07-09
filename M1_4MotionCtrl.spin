@@ -23,16 +23,14 @@ OBJ
 VAR
 
 byte xEnable[5]
-byte xStartMove[5]
-byte xRunning[5]
-byte xShort[5]
-byte xTriangle[5]
-byte xTrapeze[5]
+byte xMoveStart[5]
+byte xMoveDone[5]
 
 byte byState[5]
 
 long lgSollPos[5]
 long lgIstPos[5]
+long lgRelativeDistance
 
 word woSpeed[5]
 word woMinSpeed[5]
@@ -58,12 +56,24 @@ byte byCogID1
 
 
 PUB Start
-   
   byCogID1 := cognew (MotionLoop,0)
 
+PUB SetWantedPos(Pos)
+  lgRelativeDistance:=Pos
+  
+PUB ReadActualPos(x)
+  return stpmtr.ActualPosition(x)
 
 PUB AutoMode(x, Auto)
   return stpmtr.Automode(x,Auto)      
+
+PUB SetSpeed(x,speed)
+PUB SetAcceleration(x,acc)
+PUB SetDeceleration(x,dec)
+PUB SetRelMove(x,dist)
+    stpmtr r
+
+
 
 PUB Enable(x, Enab)
   return stpmtr.Enable(x,Enab)      
@@ -83,21 +93,15 @@ PUB JogBackward(x, Jog)
 PUB SetMaxCount(x, count)
   stpmtr.SetMaxCount(x, count)
 
-PUB ExecuteTime
-  return stpmtr.ExecuteTime
-
-PUB LoopCount
-  return stpmtr.LoopCount
-
-PUB Stat
-  return stpmtr.Stat  
-
 PUB Direction(x)
   return stpmtr.Direction(x)
 
-
-PUB Pulsing(x)
-  return stpmtr.Pulsing(x)
+PUB Done(x)
+  case x
+    1:  return xMoveDone[1]
+    2:  return xMoveDone[2]
+    3:  return xMoveDone[3]
+    4:  return xMoveDone[4]
   
 
 PUB AtPosition(x)
@@ -105,7 +109,7 @@ PUB AtPosition(x)
   
 
 PUB ActualPosition(x)
-  return stpmtr.ActualPosition(x)
+  
  
 
 PUB WantedPosition(x)
@@ -132,22 +136,28 @@ PUB MotionLoop
   case byState[i]
 
     0:
-      IF xStartMove[i]
-        xRunning[i] := TRUE
+      IF xMoveStart[i]
+        xMoveDone[i] := false
 
         byState[i] := 1
 
-    1:  'Calculations
-      xShort[i]                 := false
-      xTriangle[i]              := false
-      xTrapeze[i]          := false
+    1:  'Determine type of move
 
-      x1 := ( woSpeed[i] * woSpeed[i] ) / (2 * lgAcc[i] ) 
-      x2 := ( woSpeed[i] * woSpeed[i] ) / (2 * lgDec[i] ) 
-      if  ( lgSollPos[i] - stpmtr.ActualPosition(i) ) =< ( x1 + x2 )
-        xShort[5] := true
-
-      ''if woCalcSpeed[i] <   
+      x1[i] := ( woSpeed[i] * woSpeed[i] ) / (2 * lgAcc[i] ) 
+      x2[i] := ( woSpeed[i] * woSpeed[i] ) / (2 * lgDec[i] )
+      
+      if  ( lgSollPos[i] - stpmtr.ActualPosition(i) ) =< ( x1[i] + x2[i] )
+        byState[i] := 10
+        woCalcSpeed[i] := woSpeed[i]
+      else
+        woCalcSpeed := woSpeed[i] * ( lgRelativeDistance / ( x1[i] - x2[i] ) )
+        if lgRelativeDistance / (x1[i]-x2[i]) => 0.1   ''10%
+          byState[i] := 20
+        else  
+          woCalcSpeed :=   0
+          byState[i] := 30
+          
+         
 
         
       lgAccelCalc[i] := lgAcc[i] / 100
@@ -155,18 +165,23 @@ PUB MotionLoop
       
       byState[i] := 2
     
-    2:
+    10: 'trapezoidual move
       woActualSpeed[i] :=  woActualSpeed[i] + lgAccelCalc[i]
       IF woActualSpeed[i] > woSpeed[i]
         woActualSpeed[i] := woSpeed[i]
 
-      IF xShort[5]      
-        IF woActualSpeed[i] := woCalcSpeed[i]
-             byState[i] := 3
-      else
+      
+  
+    20: 'triangle move
+      woActualSpeed[i] :=  woActualSpeed[i] + lgAccelCalc[i]
+      IF woActualSpeed[i] > woSpeed[i]
+        woActualSpeed[i] := woSpeed[i]
+
+     IF woActualSpeed[i] := woCalcSpeed[i]
+         byState[i] := 21
+     else
         IF lgSollPos[i]-lgIstPos[i] < x2
              byState[i] := 3
-  
     3:
       woActualSpeed[i] :=  woActualSpeed[i] - lgDecelCalc[i]
       IF woActualSpeed[i] < woMinSpeed[i]
@@ -174,11 +189,7 @@ PUB MotionLoop
              
       IF lgSollPos[i]-lgIstPos[i] <= lgLag[i]
              byState[i] := 3
-    4:
-      ''IF !M1Run         
-        xRunning[i] := FALSE
-            
-
+   
 
   
               

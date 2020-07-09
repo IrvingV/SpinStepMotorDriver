@@ -21,6 +21,7 @@ VAR
 
   long Enabled[5]
 
+
   long M1WntPos
   long M2WntPos
   long M3WntPos
@@ -35,7 +36,10 @@ VAR
   long M2JogBackward
   long M3JogBackward
   long M4JogBackward
-  byte i
+
+  byte byProfileGeneratotorState
+
+  
   byte j
  
 PRI PrnXyDec(x,y,d)
@@ -62,10 +66,10 @@ PUB Main
   pc.Start(PC_BAUD)
   motn.start
   
-  motn.SetMaxCount(1,11)
-  motn.SetMaxCount(2,12)
-  motn.SetMaxCount(3,13)
-  motn.SetMaxCount(4,14)
+  motn.SetSpeed(1,300)
+  motn.SetAcceleration(1,100)
+  motn.SetDeceleration(1,100)
+  motn.SetRelMove(1,2000)
   AutoMode[1] := false
   AutoMode[2] := false
   AutoMode[3] := false
@@ -86,14 +90,6 @@ PUB Main
   pc.clear
   repeat
       waitcnt(cnt + 20000)
-      PrnXyStr(1, 2, string("stepmotor execute time and taskcounter "))
-      PrnXyDec(50, 2, motn.ExecuteTime)
-      PrnXyDec(60, 2, motn.LoopCount / 2)
-
-      PrnXyStr(0, 5, string(" 1=auto/manual  2=disabled/enabled   3=homepos   4=wantedpos   5=fast   6=slow   7=JogFw   8=JogBw"))
-
-'                            01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890'
-      PrnXyStr(0, 9, string("          mode      enabled   direction pulsing   act.pos   wnt.pos   At.pos    act.count max.count"))
       repeat i from 1 to 4
         PrnXyBool(10, i+11, AutoMode[i])
         PrnXyBool(20, i+11, Enabled[i])
