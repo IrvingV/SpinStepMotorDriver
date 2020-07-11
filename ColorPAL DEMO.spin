@@ -40,7 +40,7 @@ VAR
   byte byProfileGeneratotorState
 
   
-  byte j
+  byte z,i,j
  
 PRI PrnXyDec(x,y,d)
   pc.Position(x,y)
@@ -69,7 +69,6 @@ PUB Main
   motn.SetSpeed(1,300)
   motn.SetAcceleration(1,100)
   motn.SetDeceleration(1,100)
-  motn.SetRelMove(1,2000)
   AutoMode[1] := false
   AutoMode[2] := false
   AutoMode[3] := false
@@ -89,26 +88,27 @@ PUB Main
   
   pc.clear
   repeat
-      waitcnt(cnt + 20000)
-      repeat i from 1 to 4
-        PrnXyBool(10, i+11, AutoMode[i])
-        PrnXyBool(20, i+11, Enabled[i])
-        PrnXyBool(30, i+11, motn.Direction(i))
-        PrnXyBool(40, i+11, motn.Pulsing(i))
+    waitcnt(cnt + 20000)
+    z++  
+    pc.dec(0)
+    repeat i from 1 to 4
+        ''pc.Home
+''        PrnXyBool(10, i, AutoMode[i])
+  ''      PrnXyBool(20, i, Enabled[i])
+    ''    PrnXyDec(30, i, motn.ProfileState(i))
+{{        PrnXyBool(40, i+11, motn.Pulsing(i))
         PrnXyDec (50, i+11, motn.ActualPosition(i))
         PrnXyDec (60, i+11, motn.WantedPosition(i))
         PrnXyBool(70, i+11, motn.AtPosition(i))
         PrnXyDec (80, i+11, motn.ActualCount(i))
         PrnXyDec (90, i+11, motn.MaxCount(i))
-
-
-
+}}
 
     xKeyPressed := pc.RxCheck
 
-    if xKeyPressed == "1"
-      AutoMode[1] := motn.AutoMode(1,NOT AutoMode[1])
-    if xKeyPressed == "q"
+   if xKeyPressed == "1"
+      motn.StartRelMove(1,1000)
+ {{   if xKeyPressed == "q"
       AutoMode[2] := motn.AutoMode(2,NOT AutoMode[2])
     if xKeyPressed == "a"
       AutoMode[3] := motn.AutoMode(3,NOT AutoMode[3])
@@ -185,7 +185,7 @@ PUB Main
     if xKeyPressed == ","
         motn.JogBackward(4,not M4JogBackward)
         M4JogBackward := not M4JogBackward
-
+   }}
 DAT
 
  
