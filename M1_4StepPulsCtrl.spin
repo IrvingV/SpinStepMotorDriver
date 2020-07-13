@@ -54,7 +54,7 @@ OBJ
 VAR
 byte byCogID                 
  
-PUB StartM1_M4(x)
+PUB StartM1_M4
   byCogID := cognew (@entry,0)
 
 PUB AutoMode(x, Auto)

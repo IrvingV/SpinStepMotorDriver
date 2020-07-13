@@ -26,8 +26,6 @@ byte xEnable[5]
 byte xMoveStart[5]
 byte xMoveDone[5]
 
-byte byState[5]
-
 long lgSollPos[5]
 long lgIstPos[5]
 long lgRelativeDistance
@@ -51,16 +49,17 @@ long lgStartTime
 long lgExecuteTime               
 
 byte byCogID1
-
-
-
-
+long woState
+ 
 PUB Start
-  byCogID1 := cognew (MotionLoop,0)
+  byCogID1   := cognew (MotionLoop,0)
+  waitcnt(cnt+1000)
+  stpmtr.StartM1_M4
+  waitcnt(cnt+1000)
 
-PUB ProfileState(x)
-  return byState[x]
-  
+PUB ProfileState
+  return woState
+
 PUB ReadActualPos(x)
   return stpmtr.ActualPosition(x)
 
@@ -124,15 +123,18 @@ PUB MotionLoop
     'woMxAcc                  100..100000               steps/sec^2
     'woMxDec                  100..100000               steps/sec^2
     'woSollPos                min..max                  steps
-  i:=1
-  repeat 
-    case byState[i]
+
+
+  woState:=3
+  repeat
+    waitcnt (cnt+ 100000) 
+    case woState
 
       0:
         IF xMoveStart[i]
-        xMoveDone[i] := false
+          xMoveDone[i] := false
 
-        byState[i] := 1
+          woState := 1
 
       1:  'Determine type of move
 
@@ -140,15 +142,15 @@ PUB MotionLoop
         x2[i] := ( woSpeed[i] * woSpeed[i] ) / (2 * lgDec[i] )
       
         if  ( lgSollPos[i] - stpmtr.ActualPosition(i) ) =< ( x1[i] + x2[i] )
-          byState[i] := 10
+          woState := 10
           woCalcSpeed[i] := woSpeed[i]
         else
           woCalcSpeed := woSpeed[i] * ( lgRelativeDistance / ( x1[i] - x2[i] ) )
           if lgRelativeDistance / (x1[i]-x2[i]) => 0.1   ''10%
-           byState[i] := 20
+           woState := 20
           else  
             woCalcSpeed :=   0
-            byState[i] := 30
+            woState := 30
           
          
 
@@ -156,7 +158,7 @@ PUB MotionLoop
         lgAccelCalc[i] := lgAcc[i] / 100
         lgDecelCalc[i] := lgDec[i] / 100
       
-        byState[i] := 2
+        woState := 2
     
       10: 'trapezoidual move
         woActualSpeed[i] :=  woActualSpeed[i] + lgAccelCalc[i]
@@ -171,19 +173,16 @@ PUB MotionLoop
           woActualSpeed[i] := woSpeed[i]
 
        IF woActualSpeed[i] := woCalcSpeed[i]
-         byState[i] := 21
+         woState := 21
        else
          IF lgSollPos[i]-lgIstPos[i] < x2
-             byState[i] := 3
+             woState := 3
       3:
         woActualSpeed[i] :=  woActualSpeed[i] - lgDecelCalc[i]
         IF woActualSpeed[i] < woMinSpeed[i]
           woActualSpeed[i] := woSpeed[i]
               
         IF lgSollPos[i]-lgIstPos[i] <= lgLag[i]
-          byState[i] := 3
+          woState := 3
           
-
-DAT
-
-hubActPos                long $7020
+ 
