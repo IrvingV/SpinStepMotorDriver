@@ -19,7 +19,7 @@ CON
   
 OBJ
   stpmtr        : "M1_4StepPulsCtrl"
-
+ 
 VAR
 
 byte xEnable[5]
@@ -52,19 +52,17 @@ byte byCogID1
 long woState
  
 PUB Start
-  byCogID1   := cognew (MotionLoop,0)
-  waitcnt(cnt+1000)
-  stpmtr.StartM1_M4
-  waitcnt(cnt+1000)
+  ''cogstop(cogid)
+  coginit (cogid, MotionLoop, 0)
 
 PUB ProfileState
   return woState
 
 PUB ReadActualPos(x)
-  return stpmtr.ActualPosition(x)
+ '' return stpmtr.ActualPosition(x)
 
 PUB AutoMode(x, Auto)
-  return stpmtr.Automode(x,Auto)      
+''  return stpmtr.Automode(x,Auto)      
 
 PUB SetSpeed(x,speed)
 
@@ -77,19 +75,19 @@ PUB StartrelMove(x,dist)
   
 
 PUB Enable(x, Enab)
-  return stpmtr.Enable(x,Enab)      
+  ''return stpmtr.Enable(x,Enab)      
 
 PUB SetHomePosition(x, Pos)
-  stpmtr.SetHomePosition(x, Pos)      
+  ''stpmtr.SetHomePosition(x, Pos)      
 
 PUB JogForward(x, Jog)
-  stpmtr.JogForward(x, Jog)       
+  ''stpmtr.JogForward(x, Jog)       
 
 PUB JogBackward(x, Jog)
-  stpmtr.JogBackward(x, Jog)
+  ''stpmtr.JogBackward(x, Jog)
   
 PUB SetMaxCount(x, count)
-  stpmtr.SetMaxCount(x, count)
+  ''stpmtr.SetMaxCount(x, count)
 
 
 PUB Done(x)
@@ -97,7 +95,7 @@ PUB Done(x)
   
 
 PUB AtPosition(x)
-  return stpmtr.AtPosition(x)
+  ''return stpmtr.AtPosition(x)
   
 
 PUB ActualPosition(x)
@@ -105,18 +103,18 @@ PUB ActualPosition(x)
  
 
 PUB WantedPosition(x)
-  return stpmtr.WantedPosition(x)
+  ''return stpmtr.WantedPosition(x)
  
 
 PUB ActualCount(x)
-  return stpmtr.ActualCount(x)
+  ''return stpmtr.ActualCount(x)
  
 
 PUB MaxCount(x)
-  return stpmtr.MaxCount(x)
+  ''return stpmtr.MaxCount(x)
 
 
-PUB MotionLoop
+PRI MotionLoop
 
   'Parameters
     'woMxSpeed                1..10000                  steps/sec
@@ -128,7 +126,7 @@ PUB MotionLoop
   woState:=3
   repeat
     waitcnt (cnt+ 100000) 
-    case woState
+{{    case woState
 
       0:
         IF xMoveStart[i]
@@ -140,7 +138,7 @@ PUB MotionLoop
 
         x1[i] := ( woSpeed[i] * woSpeed[i] ) / (2 * lgAcc[i] ) 
         x2[i] := ( woSpeed[i] * woSpeed[i] ) / (2 * lgDec[i] )
-      
+{{      
         if  ( lgSollPos[i] - stpmtr.ActualPosition(i) ) =< ( x1[i] + x2[i] )
           woState := 10
           woCalcSpeed[i] := woSpeed[i]
@@ -152,9 +150,9 @@ PUB MotionLoop
             woCalcSpeed :=   0
             woState := 30
           
-         
+ }}        
 
-        
+{{        
         lgAccelCalc[i] := lgAcc[i] / 100
         lgDecelCalc[i] := lgDec[i] / 100
       
@@ -185,4 +183,4 @@ PUB MotionLoop
         IF lgSollPos[i]-lgIstPos[i] <= lgLag[i]
           woState := 3
           
- 
+ }}

@@ -12,6 +12,7 @@ CON
    
 OBJ
   pc            : "Parallax Serial Terminal"
+  ''stpmtr        : "M1_4StepPulsCtrl"
   motn          : "M1_4MotionCtrl"
 
 VAR
@@ -63,55 +64,43 @@ PRI PrnXyBool(x,y,b)
     pc.Str(string("?????"))  
 
 PUB Main
+ ''  cogstop(cogid) 
+ ''waitcnt(cnt + 20000)
+ ''stpmtr.Start
+ waitcnt(cnt + 20000)
 
-  pc.Start(PC_BAUD)
-  '..motn.Start
 
-  waitcnt(cnt + 20000)
 
+ ''motn.Start
+
+
+
+
+ waitcnt(cnt + 20000)
+ pc.Start(PC_BAUD)
+ 
   
-{{  
-  motn.SetSpeed(1,300)
-  motn.SetAcceleration(1,100)
-  motn.SetDeceleration(1,100)
-  AutoMode[1] := false
-  AutoMode[2] := false
-  AutoMode[3] := false
-  AutoMode[4] := false
-  Enabled[1] := false
-  Enabled[2] := false
-  Enabled[3] := false
-  Enabled[4] := false
-  M1JogForward := false
-  M2JogForward := false
-  M3JogForward := false
-  M4JogForward := false
-  M1JogBackward := false
-  M2JogBackward := false
-  M3JogBackward := false
-  M4JogBackward := false
-}}  
- ''PrnXyStr(1,1,string("test test"))
  repeat
-    waitcnt(cnt + 5000000)
-    ''z++  
+    waitcnt(cnt + 100000000)
+    z++  
     ''pc.dec(z)
     repeat i from 1 to 4
         PrnXyBool(10, i, AutoMode[i])
         PrnXyBool(20, i, Enabled[i])
-        PrnXyDec (30, i, motn.ProfileState)
+        PrnXyDec (30, i, z)
+        ''PrnXyDec (40, i, motn.ProfileState)
 {{        PrnXyBool(40, i+11, motn.Pulsing(i))
         PrnXyDec (50, i+11, motn.ActualPosition(i))
         PrnXyDec (60, i+11, motn.WantedPosition(i))
         PrnXyBool(70, i+11, motn.AtPosition(i))
         PrnXyDec (80, i+11, motn.ActualCount(i))
         PrnXyDec (90, i+11, motn.MaxCount(i))
-}}
 
-    xKeyPressed := pc.RxCheck
 
-   if xKeyPressed == "1"
-     motn.StartRelMove(1,1000)
+     xKeyPressed := pc.RxCheck
+
+     if xKeyPressed == "1"
+       motn.StartRelMove(1,1000)
  {{   if xKeyPressed == "q"
       AutoMode[2] := motn.AutoMode(2,NOT AutoMode[2])
     if xKeyPressed == "a"

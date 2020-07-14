@@ -54,8 +54,9 @@ OBJ
 VAR
 byte byCogID                 
  
-PUB StartM1_M4
-  byCogID := cognew (@entry,0)
+PUB Start
+  ''cogstop(cogid)
+  coginit (2,@entry,0)
 
 PUB AutoMode(x, Auto)
   if Auto
@@ -594,11 +595,6 @@ hubM2ActPos             long $7024
 hubM3ActPos             long $7028
 hubM4ActPos             long $702C
 
-hubM1WntPos             long $7060
-hubM2WntPos             long $7064
-hubM3WntPos             long $7068
-hubM4WntPos             long $706C
-
 hubM1ActCount           long $7030
 hubM2ActCount           long $7034
 hubM3ActCount           long $7038
@@ -611,6 +607,13 @@ hubM4MaxCount           long $704C
 
 hubExecTime             long $7050
 hubExecCounter          long $7054
+
+hubM1WntPos             long $7060
+hubM2WntPos             long $7064
+hubM3WntPos             long $7068
+hubM4WntPos             long $706C
+
+
 
 lgExecCounter           res
 
