@@ -18,7 +18,6 @@ CON
   _xinfreq      = 5_000_000
   
 OBJ
-  stpmtr        : "M1_4StepPulsCtrl"
  
 VAR
 
@@ -42,7 +41,7 @@ long lgLag[5]
 long lgAccelCalc[5]
 long lgDecelCalc[5]
 
-long i, x1,x2
+long i,n, x1[5], x2[5]
 
 long lgActualPos         
 long lgStartTime             
@@ -50,13 +49,14 @@ long lgExecuteTime
 
 byte byCogID1
 long woState
+long actpos
  
 PUB Start
   ''cogstop(cogid)
-  coginit (cogid, MotionLoop, 0)
+  cognew (MotionLoop, 0)
 
-PUB ProfileState
-  return woState
+PUB ProfileState(x)
+  return woState[x]
 
 PUB ReadActualPos(x)
  '' return stpmtr.ActualPosition(x)
@@ -71,7 +71,7 @@ PUB SetAcceleration(x,acc)
 PUB SetDeceleration(x,dec)
 
 PUB StartrelMove(x,dist)
-  xMoveStart[x] := true
+  xMoveStart[1] := true
   
 
 PUB Enable(x, Enab)
@@ -98,8 +98,8 @@ PUB AtPosition(x)
   ''return stpmtr.AtPosition(x)
   
 
-PUB ActualPosition(x)
-  
+PUB SetActualPosition(x,pos)
+    actpos[x]:=pos
  
 
 PUB WantedPosition(x)
@@ -123,40 +123,41 @@ PRI MotionLoop
     'woSollPos                min..max                  steps
 
 
-  woState:=3
   repeat
     waitcnt (cnt+ 100000) 
-{{    case woState
+    i:=1
+    n:= woState[i]
+    case n
 
-      0:
-        IF xMoveStart[i]
+      0: 'wait for start command
+         IF xMoveStart[i]
+          xMoveStart[i] := false
           xMoveDone[i] := false
 
-          woState := 1
+          woState[i] := 1
 
       1:  'Determine type of move
 
         x1[i] := ( woSpeed[i] * woSpeed[i] ) / (2 * lgAcc[i] ) 
         x2[i] := ( woSpeed[i] * woSpeed[i] ) / (2 * lgDec[i] )
-{{      
-        if  ( lgSollPos[i] - stpmtr.ActualPosition(i) ) =< ( x1[i] + x2[i] )
-          woState := 10
+        if  ( lgSollPos[i] - actpos[i] ) =< ( x1[i] + x2[i] )
+          woState[i] := 10
           woCalcSpeed[i] := woSpeed[i]
         else
           woCalcSpeed := woSpeed[i] * ( lgRelativeDistance / ( x1[i] - x2[i] ) )
           if lgRelativeDistance / (x1[i]-x2[i]) => 0.1   ''10%
-           woState := 20
+           woState[i] := 20
           else  
             woCalcSpeed :=   0
-            woState := 30
+            woState[i] := 30
           
- }}        
+      
 
 {{        
         lgAccelCalc[i] := lgAcc[i] / 100
         lgDecelCalc[i] := lgDec[i] / 100
       
-        woState := 2
+        woState[i] := 2
     
       10: 'trapezoidual move
         woActualSpeed[i] :=  woActualSpeed[i] + lgAccelCalc[i]
