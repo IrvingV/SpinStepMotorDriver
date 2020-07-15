@@ -42,7 +42,7 @@ VAR
 
   
   byte i,j
-  long z
+  long alive
  
 PRI PrnXyDec(x,y,d)
   pc.Position(x,y)
@@ -64,33 +64,39 @@ PRI PrnXyBool(x,y,b)
     pc.Str(string("?????"))  
 
 PUB Main
+
   pc.Start(PC_BAUD)
   stpmtr.Start
   motn.Start
 
+  motn.Set_woVmax(1,100)
+  motn.Set_lgAcc(1,100)
+  motn.Set_lgDec(1,100)
+  motn.Set_lgWntPos(1,75)
+  motn.Set_lgActPos(1,-1)
+  
   repeat
-    waitcnt(cnt + 100000000)
+    waitcnt(cnt + 10000000)
     i:=1
-    z++  
-    ''pc.dec(z)
+    alive++  
+    PrnXyDec (10, i, alive)
     ''repeat i from 1 to 4
-        PrnXyBool(10, i, AutoMode[i])
-        PrnXyBool(20, i, Enabled[i])
-        PrnXyDec (30, i, z)
-        PrnXyDec (40, i, motn.ProfileState(i))
-{{        PrnXyBool(40, i+11, motn.Pulsing(i))
-        PrnXyDec (50, i+11, motn.ActualPosition(i))
-        PrnXyDec (60, i+11, motn.WantedPosition(i))
-        PrnXyBool(70, i+11, motn.AtPosition(i))
-        PrnXyDec (80, i+11, motn.ActualCount(i))
-        PrnXyDec (90, i+11, motn.MaxCount(i))
+                              '12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+        PrnXyStr(1, 0, string("         alive     mode      enabled   state     actpos    wntpos    x1        x2        relDist   v calced"))
+        PrnXyBool(20, i+1, AutoMode[i])
+        PrnXyBool(30, i+1, Enabled[i])
+        PrnXyDec (40, i+1, motn.Get_woState(i))
+        PrnXyDec (50, i+1, motn.Get_lgActPos(i))
+        PrnXyDec (60, i+1, motn.Get_lgWntPos(i))
+        PrnXyDec (70, i+1, motn.Get_lgX1(i))
+        PrnXyDec (80, i+1, motn.Get_lgX2(i))
+        PrnXyDec (90, i+1, motn.Get_lgRelDist(i))
+        PrnXyDec (100, i+1, motn.Get_woVcalced(i))
 
-}}
     xKeyPressed := pc.RxCheck
 
     if xKeyPressed == "1"
        motn.StartRelMove(1,1000)
-       PrnXyStr(50,50,string("toets 1 pressed"))
         
  {{   if xKeyPressed == "q"
       AutoMode[2] := motn.AutoMode(2,NOT AutoMode[2])
