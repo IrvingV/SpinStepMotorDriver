@@ -17,8 +17,8 @@ VAR
 byte    xMoveStart[5]
 long    lgWntPos[5]
 long    lgActPos[5]
-word    woVmin[5]
-word    woVmax[5]
+long    lgVmin[5]
+long    lgVmax[5]
 long    lgAcc[5]
 long    lgDec[5]
 
@@ -27,8 +27,11 @@ long    i, n
 long    lgX1[5]
 long    lgX2[5]
 long    lgRelDist[5]
-word    woVcalced[5]
+long    lgVcalced[5]
 word    woState[5]
+long    lgDx
+long    lgActV[5]
+long    lgAccPer10ms[5]
 
 ' Var Out
 byte    xMoveDone[5]
@@ -52,18 +55,22 @@ PUB Get_lgX1(x)
 PUB Get_lgX2(x)
   return lgX2[x]
 
-PUB Get_woVcalced(x)
-  return woVcalced[x]
+PUB Get_lgVcalced(x)
+  return lgVcalced[x]
 
 PUB Get_lgRelDist(x)
   return lgRelDist[x]
+
 
 PUB Get_Done(x)
     return xMoveDone[x]
 
 
-PUB Set_woVmax(x,speed)
-  woVmax[x] := speed
+PUB Set_lgVmax(x,speed)
+  lgVmax[x] := speed
+
+PUB Set_lgVmin(x,speed)
+  lgVmin[x] := speed
 
 PUB Set_lgAcc(x,acc)
   lgAcc[x]:=acc
@@ -81,15 +88,11 @@ PUB Set_lgWntPos(x,pos)
 PUB StartrelMove(x,dist)
   xMoveStart[1] := true
 
-
+PUB WriteSpeed(x, Speed)
+  ''..case x
+  ''.. 1: long($7040) write
+  
 PRI MotionLoop
-
-  'Parameters
-    'woMxSpeed                1..10000                  steps/sec
-    'woMxAcc                  100..100000               steps/sec^2
-    'woMxDec                  100..100000               steps/sec^2
-    'woSollPos                min..max                  steps
-
 
   repeat
     waitcnt (cnt+ 100000) 
@@ -105,25 +108,66 @@ PRI MotionLoop
           woState[i] := 1
 
       1:  'Determine type of move
+        lgAccPer10ms[i] := lgAcc[i] /100  'accelaration in mm/10ms2 '
 
-        lgX1[i] := ( woVmax[i] * woVmax[i] ) / (2 * lgAcc[i] ) 
-        lgX2[i] := ( woVmax[i] * woVmax[i] ) / (2 * lgDec[i] )
-        lgRelDist[i] := lgWntPos[i] - lgActpos[i]
+      
+        lgX1[i]                 := ( lgVmax[i] * lgVmax[i] ) / (2 * lgAcc[i] ) 
+        lgX2[i]                 := ( lgVmax[i] * lgVmax[i] ) / (2 * lgDec[i] )
+        lgDx[i]                 := lgX1[i] + lgX2[i]
+        lgRelDist[i]            := lgWntPos[i] - lgActpos[i]
 
-        if  ( lgRelDist[i] ) => ( lgX1[i] + lgX2[i] )
+        if  lgRelDist[i] => lgDx[i]
         
-          woState[i] := 10
-          woVcalced[i] := woVmax[i]
+          woState[i] := 10              ' trapezoidial move
 
         else
-          if lgRelDist[i] / (lgX1[i]-lgX2[i]) =< 0.1   ''10%
+          if lgRelDist[i] => lgDx[i] * lgVmin[i] / lgVmax[i]
           
-            woState[i] := 20
-            woVcalced[i] := woVmax[i] * ( lgRelDist[i] / ( lgX1[i] - lgX2[i] ) )  percentage berekening maken
+            woState[i] := 20           ' triangle move 
+            lgVcalced[i] := lgVmax[i] * lgRelDist[i] / lgDx[i]
 
           else  
             woState[i] := 30
-            woVcalced[i] :=  woVmin[i]
-            
+
+      10: 'Trapezoidial move
+      
+      ' 'start pulsing
+
+        lgActV[i] := lgAccPer10ms[i]
+        ''write speed
+        woState[i] := 12
       
 
+      
+ 
+      12: 'Trapezoidial move
+        lgActV[i] := lgActV[i] + lgAccPer10ms[i]
+        if lgActV[i] > lgVmax[i]
+          lgActV[i] := lgVmax[i]
+          woState[i] := 11
+
+      10: 'Wait for deceleration point
+       '' if lgActpos[i]
+
+
+
+
+
+      
+
+
+           
+      20: 'Triangle move
+
+
+
+
+           
+      30: 'Square move     
+      
+
+
+
+dat
+
+lgSpeed      

@@ -17,7 +17,7 @@ OBJ
 
 VAR
   byte xKeyPressed
-
+{{
   long AutoMode[5]
 
   long Enabled[5]
@@ -39,7 +39,7 @@ VAR
   long M4JogBackward
 
   byte byProfileGeneratotorState
-
+}}
   
   byte i,j
   long alive
@@ -69,11 +69,12 @@ PUB Main
   stpmtr.Start
   motn.Start
 
-  motn.Set_woVmax(1,100)
+  motn.Set_lgVmax(1,100)
+  motn.Set_lgVmin(1,10)
   motn.Set_lgAcc(1,100)
   motn.Set_lgDec(1,100)
-  motn.Set_lgWntPos(1,75)
-  motn.Set_lgActPos(1,-1)
+  motn.Set_lgWntPos(1,11)
+  motn.Set_lgActPos(1,0)
   
   repeat
     waitcnt(cnt + 10000000)
@@ -83,16 +84,14 @@ PUB Main
     ''repeat i from 1 to 4
                               '12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
         PrnXyStr(1, 0, string("         alive     mode      enabled   state     actpos    wntpos    x1        x2        relDist   v calced"))
-        PrnXyBool(20, i+1, AutoMode[i])
-        PrnXyBool(30, i+1, Enabled[i])
         PrnXyDec (40, i+1, motn.Get_woState(i))
         PrnXyDec (50, i+1, motn.Get_lgActPos(i))
         PrnXyDec (60, i+1, motn.Get_lgWntPos(i))
         PrnXyDec (70, i+1, motn.Get_lgX1(i))
         PrnXyDec (80, i+1, motn.Get_lgX2(i))
         PrnXyDec (90, i+1, motn.Get_lgRelDist(i))
-        PrnXyDec (100, i+1, motn.Get_woVcalced(i))
-
+        PrnXyDec (100, i+1, motn.Get_lgVcalced(i))
+  
     xKeyPressed := pc.RxCheck
 
     if xKeyPressed == "1"
