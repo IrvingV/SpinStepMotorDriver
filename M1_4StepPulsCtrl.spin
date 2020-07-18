@@ -140,13 +140,13 @@ PUB JogBackward (x, Jog)
       3: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b23
       4: long[hubM1_4Ctrl] := long[hubM1_4Ctrl] & !b31
 
-PUB SetMaxCount (x, count)
+{{PUB SetMaxCount (x, count)
     case x
       1: long[hubM1MaxCount] := count
       2: long[hubM2MaxCount] := count
       3: long[hubM3MaxCount] := count
       4: long[hubM4MaxCount] := count
-
+  }}
 
 PUB ExecuteTime
   return long[hubExecTime]
