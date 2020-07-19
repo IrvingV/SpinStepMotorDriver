@@ -81,7 +81,8 @@ PUB Main
     PrnXyDec (10, i, alive)
     ''repeat i from 1 to 4
                               '12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
-        PrnXyStr(1, 0, string("         alive     mode      enabled   state     actpos    wntpos    x1        x2        relDist   v calced"))
+        PrnXyStr(1, 0, string("         alive     error     enabled   state     actpos    wntpos    x1        x2        relDist   v calced"))
+        PrnXyDec (20, i+1, motn.Get_woError)
         PrnXyDec (40, i+1, motn.Get_byState(i))
         PrnXyDec (50, i+1, motn.Get_lgActPos(i))
         PrnXyDec (60, i+1, lgWntPos[i])

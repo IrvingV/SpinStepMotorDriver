@@ -9,9 +9,6 @@ CON
   _clkmode      = xtal1 + pll16x     
   _xinfreq      = 5_000_000
   
-OBJ
-  stpmtr        : "M1_4StepPulsCtrl"
- 
 VAR
 
 ' Var in
@@ -24,16 +21,17 @@ long    lgAcc[5]
 long    lgDec[5]
 
 'Var internal
-long    i, n
+long    i
 long    lgX1[5]
 long    lgX2[5]
 long    lgRelDist[5]
 long    lgVcalced[5]
 byte    byState[5]
 byte    byMoveType[5] '' 1= trapezoidial 2=triangle 3=rectangle
-long    lgDx
+long    lgDx[5]
 long    lgActV[5]
 long    lgAccPer10ms[5]
+word    woError    
 
 ' Var Out
 byte    xMoveDone[5]
@@ -88,43 +86,47 @@ PUB Set_lgWntPos(x,pos)
 
 'commands
 PUB StartRelMove(x,dist)
- 
-      xMoveStart[x] := true
-      lgWntPos[x] := lgActPos[x] - dist
+  xMoveStart[x] := true
+  lgWntPos[x] := lgActPos[x] - dist
 
 PUB StartAbsMove(x,pos)
- 
-      xMoveStart[x] := true
-      lgWntPos[x] := pos
+  xMoveStart[x] := true
+  lgWntPos[x] := pos
 
+PUB Get_woError
+  return woError
 
-PUB WriteSpeed(x, Speed)
-  if x==1
-    long[hubM1MaxCount] := 10000/Speed
-  if x==2
-    long[hubM2MaxCount] := 10000/Speed
-  if x==3
-    long[hubM3MaxCount] := 10000/Speed
-  if x==4
-    long[hubM4MaxCount] := 10000/Speed
-  
+PUB Reset_woError
+  woError := 0
+
+PRI WriteSpeed(x, Sped)
+  if Sped == 0
+    woError := 1000 + x
+  ''else
+{{    case x
+      1: long[hubM1MaxCount] := 10000/Speed
+      2: long[hubM2MaxCount] := 10000/Speed
+      3: long[hubM3MaxCount] := 10000/Speed
+      4: long[hubM4MaxCount] := 10000/Speed
+}}  
 
 PRI MotionLoop
-  stpmtr.Start
   repeat
     waitcnt (cnt + 100000)
     lgActPos[1]:=long[hubM1Actpos] 
+    lgActPos[2]:=long[hubM2Actpos] 
+    lgActPos[3]:=long[hubM3Actpos] 
+    lgActPos[4]:=long[hubM4Actpos] 
     i:=1
-    n:= byState[i]
     
-    case n
+    case byState[i]
 
-      00:'wait for start command
+      0: 'wait for start command
          IF xMoveStart[i]
            xMoveDone[i] := false
            byState[i] := 1
 
-      01:'Calculate settings   
+      1: 'Calculate settings   
 
          'Set acc per 10 msec
          lgAccPer10ms[i] := lgAcc[i] /100 
@@ -156,7 +158,11 @@ PRI MotionLoop
       
          'set first speed
          lgActV[i] := lgAccPer10ms[i]
-         ''WriteSpeed(i,lgActV[i])
+         'WriteSpeed(i,lgActV[i])
+
+         byState[i] := 123  
+
+         
 {{         
          'set wanted position and enable control 
          case i
@@ -199,7 +205,7 @@ PRI MotionLoop
            xMoveDone[i] := true
            byState[i] := 0
 }}              
-dat
+DAT
 
 b0                      long $1
 b1                      long $2
