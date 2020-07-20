@@ -72,7 +72,6 @@ PUB Main
   motn.Set_lgVmin(1,10)
   motn.Set_lgAcc(1,100)
   motn.Set_lgDec(1,100)
-''  motn.Set_lgWntPos(1,lgWntPos[1])
   
   repeat
     waitcnt(cnt + 10000000)
@@ -81,15 +80,16 @@ PUB Main
     PrnXyDec (10, i, alive)
     ''repeat i from 1 to 4
                               '12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
-        PrnXyStr(1, 0, string("         alive     error     enabled   state     actpos    wntpos    x1        x2        relDist   v calced"))
+        PrnXyStr(1, 0, string("         alive     error     enabled   state     actpos    wntpos    x1        x2        relDist   v calced  v actual"))
         PrnXyDec (20, i+1, motn.Get_woError)
         PrnXyDec (40, i+1, motn.Get_byState(i))
         PrnXyDec (50, i+1, motn.Get_lgActPos(i))
-        PrnXyDec (60, i+1, lgWntPos[i])
+        PrnXyDec (60, i+1, motn.Get_lgWntPos(i))
         PrnXyDec (70, i+1, motn.Get_lgX1(i))
         PrnXyDec (80, i+1, motn.Get_lgX2(i))
         PrnXyDec (90, i+1, motn.Get_lgRelDist(i))
         PrnXyDec (100, i+1, motn.Get_lgVcalced(i))
+        PrnXyDec (110, i+1, motn.Get_lgActV(i))
   
     xKeyPressed := pc.RxCheck
 

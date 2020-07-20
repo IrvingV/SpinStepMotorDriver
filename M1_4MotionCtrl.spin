@@ -51,6 +51,9 @@ PUB Get_byMoveType(x)
 PUB Get_lgActPos(x)
   return lgActPos[x]
 
+PUB Get_lgWntPos(x)
+  return lgWntPos[x]
+
 PUB Get_lgX1(x)
   return lgX1[x]
 
@@ -66,6 +69,8 @@ PUB Get_lgRelDist(x)
 PUB Get_Done(x)
     return xMoveDone[x]
 
+PUB Get_lgActV(x)
+    return lgActV[x]
 
 'Setters
 PUB Set_lgVmax(x,speed)
@@ -87,7 +92,7 @@ PUB Set_lgWntPos(x,pos)
 'commands
 PUB StartRelMove(x,dist)
   xMoveStart[x] := true
-  lgWntPos[x] := lgActPos[x] - dist
+  lgWntPos[x] := lgActPos[x] + dist
 
 PUB StartAbsMove(x,pos)
   xMoveStart[x] := true
@@ -99,16 +104,6 @@ PUB Get_woError
 PUB Reset_woError
   woError := 0
 
-PRI WriteSpeed(x, Sped)
-  if Sped == 0
-    woError := 1000 + x
-  ''else
-{{    case x
-      1: long[hubM1MaxCount] := 10000/Speed
-      2: long[hubM2MaxCount] := 10000/Speed
-      3: long[hubM3MaxCount] := 10000/Speed
-      4: long[hubM4MaxCount] := 10000/Speed
-}}  
 
 PRI MotionLoop
   repeat
@@ -158,12 +153,12 @@ PRI MotionLoop
       
          'set first speed
          lgActV[i] := lgAccPer10ms[i]
-         'WriteSpeed(i,lgActV[i])
+         case i
+           1: long[hubM1MaxCount] := 10000/lgActV[i]
+           2: long[hubM2MaxCount] := 10000/lgActV[i]
+           3: long[hubM3MaxCount] := 10000/lgActV[i]
+           4: long[hubM4MaxCount] := 10000/lgActV[i]
 
-         byState[i] := 123  
-
-         
-{{         
          'set wanted position and enable control 
          case i
            1: long[hubM1WntPos] := lgWntPos[1]
@@ -176,20 +171,25 @@ PRI MotionLoop
               long[hubM1_4Ctrl] := long[hubM1_4Ctrl] or b27+b29   
          
          byState[i] := 20  
- 
+
       20:
-        'accelerate till calced speed reached
-        lgActV[i] := lgActV[i] + lgAccPer10ms[i]
-        if lgActV[i] > lgVcalced[i]
+         'accelerate till calced speed reached
+         lgActV[i] := lgActV[i] + lgAccPer10ms[i]
+         if lgActV[i] > lgVcalced[i]
            lgActV[i] := lgVcalced[i]
+         case i
+           1: long[hubM1MaxCount] := 10000/lgActV[i]
+           2: long[hubM2MaxCount] := 10000/lgActV[i]
+           3: long[hubM3MaxCount] := 10000/lgActV[i]
+           4: long[hubM4MaxCount] := 10000/lgActV[i]
 
         'next step depending on move type      
         case byMoveType[i]
-           1: if lgX2[i] > ||(lgActpos-lgWntPos)        'trapezoidial (if decelerat distance greater than act-wnt
-              byState[i] := 30
-           2: if lgActV[i] == lgVcalced[i]              'triangle (if calced speed reached)
-              byState[i] := 30
-           3: byState[i] := 30                          'rectangle (no condition)
+           1: if ||(lgActpos[i]-lgWntPos[i]) < lgX2[i] 'trapezoidial (if decelerat distance greater than act-wnt
+              ''byState[i] := 30
+           2: if lgActV[i] == lgVcalced[i]             'triangle (if calced speed reached)
+              ''byState[i] := 30
+           3: ''byState[i] := 30                       'rectangle (no condition)
 
       30:
         'decelerate
@@ -204,7 +204,7 @@ PRI MotionLoop
          IF !xMoveStart[i]
            xMoveDone[i] := true
            byState[i] := 0
-}}              
+             
 DAT
 
 b0                      long $1
