@@ -35,7 +35,7 @@ word    woError
 
 ' Var Out
 byte    xMoveDone[5]
-
+long c
 
 PUB Start
   cognew (MotionLoop, 0)
@@ -67,11 +67,17 @@ PUB Get_lgRelDist(x)
   return lgRelDist[x]
 
 PUB Get_Done(x)
-    return xMoveDone[x]
+  return xMoveDone[x]
 
 PUB Get_lgActV(x)
-    return lgActV[x]
+  return lgActV[x]
 
+PUB  Get_lgAccPer10ms(x)
+  return lgAccPer10ms[x]
+
+PUB  Get_c
+  return c
+    
 'Setters
 PUB Set_lgVmax(x,speed)
   lgVmax[x] := speed
@@ -104,106 +110,118 @@ PUB Get_woError
 PUB Reset_woError
   woError := 0
 
+PUB Reset(x)
+  byState[x] := 0
+  lgWntPos[x]:=lgActPos[x]
+  case x
+    1: long[hubM1WntPos] := lgWntPos[1]
+       long[hubM1_4Ctrl] := long[hubM1_4Ctrl] or b5 
+    2: long[hubM2WntPos] := lgWntPos[2]                                                                      
+       long[hubM1_4Ctrl] := long[hubM1_4Ctrl] or b13 
+    3: long[hubM3WntPos] := lgWntPos[3]
+       long[hubM1_4Ctrl] := long[hubM1_4Ctrl] or b21  
+    4: long[hubM4WntPos] := lgWntPos[4]
+       long[hubM1_4Ctrl] := long[hubM1_4Ctrl] or b29   
+  
 
 PRI MotionLoop
   repeat
-    waitcnt (cnt + 100000)
+    waitcnt (cnt + 1000000)        '' 1_000_000 = 0,01 sec)
+    c++
     lgActPos[1]:=long[hubM1Actpos] 
     lgActPos[2]:=long[hubM2Actpos] 
     lgActPos[3]:=long[hubM3Actpos] 
     lgActPos[4]:=long[hubM4Actpos] 
+
     i:=1
+    ''repeat i from 1 to 4  
     
-    case byState[i]
+      case byState[i]
 
-      0: 'wait for start command
-         IF xMoveStart[i]
-           xMoveDone[i] := false
-           byState[i] := 1
+        0: 'wait for start command
+          IF xMoveStart[i]
+            xMoveStart[i] := false
+            xMoveDone[i] := false
+            byState[i] := 10
 
-      1: 'Calculate settings   
+        10: 'Calculate settings   
 
-         'Set acc per 10 msec
-         lgAccPer10ms[i] := lgAcc[i] /100 
+          'Set acc per 10 msec
+           lgAccPer10ms[i] := lgAcc[i] / 100 
 
-         'Determine type of move
-         lgX1[i]                 := ( lgVmax[i] * lgVmax[i] ) / (2 * lgAcc[i] ) 
-         lgX2[i]                 := ( lgVmax[i] * lgVmax[i] ) / (2 * lgDec[i] )
-         lgDx[i]                 := lgX1[i] + lgX2[i]
-         lgRelDist[i]            := ||(lgWntPos[i] - lgActpos[i])
+           'Determine type of move
+           lgX1[i] := ( lgVmax[i] * lgVmax[i] ) / ( 2 * lgAcc[i] ) 
+           lgX2[i] := ( lgVmax[i] * lgVmax[i] ) / ( 2 * lgDec[i] )
+           lgDx[i] := lgX1[i] + lgX2[i]
+           lgRelDist[i] := ||(lgWntPos[i] - lgActpos[i])
 
-         if lgRelDist[i] => lgDx[i]
+           if lgRelDist[i] => lgDx[i]
         
-           byMoveType[i] := 1                                                   ' trapezoidial move
-           lgVcalced[i] := lgVmax[i]                               
+             byMoveType[i] := 1                                                   ' trapezoidial move
+             lgVcalced[i] := lgVmax[i]                               
 
-         else
-           if lgRelDist[i] => lgDx[i] * lgVmin[i] / lgVmax[i]
+           else
+             if lgRelDist[i] => lgDx[i] * lgVmin[i] / lgVmax[i]
           
-             byMoveType[i] := 2                                                 ' triangle move 
-             lgVcalced[i] := lgVmax[i] * lgRelDist[i] / lgDx[i]
+               byMoveType[i] := 2                                                 ' triangle move 
+               lgVcalced[i] := lgVmax[i] * lgRelDist[i] / lgDx[i]
 
-           else                                                                 
-             byMoveType[i] := 3                                                 ' rectangle move                               
-             lgVcalced[i] := lgVmin[i]                                                                                
+             else                                                                 
+               byMoveType[i] := 3                                                 ' rectangle move                               
+               lgVcalced[i] := lgVmin[i]                                                                                
 
-         byState[i] := 10  
+           'set first speed
+           lgActV[i] := lgAccPer10ms[i]
+           case i
+             1: long[hubM1MaxCount] := 10000/lgActV[i]
+             2: long[hubM2MaxCount] := 10000/lgActV[i]
+             3: long[hubM3MaxCount] := 10000/lgActV[i]
+             4: long[hubM4MaxCount] := 10000/lgActV[i]
 
-      10:'Start motion
-      
-         'set first speed
-         lgActV[i] := lgAccPer10ms[i]
-         case i
-           1: long[hubM1MaxCount] := 10000/lgActV[i]
-           2: long[hubM2MaxCount] := 10000/lgActV[i]
-           3: long[hubM3MaxCount] := 10000/lgActV[i]
-           4: long[hubM4MaxCount] := 10000/lgActV[i]
-
-         'set wanted position and enable control 
-         case i
-           1: long[hubM1WntPos] := lgWntPos[1]
-              long[hubM1_4Ctrl] := long[hubM1_4Ctrl] or b3+b5 
-           2: long[hubM2WntPos] := lgWntPos[2]                                                                      
-              long[hubM1_4Ctrl] := long[hubM1_4Ctrl] or b11+b13 
-           3: long[hubM3WntPos] := lgWntPos[3]
-              long[hubM1_4Ctrl] := long[hubM1_4Ctrl] or b19+b21  
-           4: long[hubM4WntPos] := lgWntPos[4]
-              long[hubM1_4Ctrl] := long[hubM1_4Ctrl] or b27+b29   
+           'set wanted position and enable control 
+           case i
+             1: long[hubM1WntPos] := lgWntPos[1]
+                long[hubM1_4Ctrl] := long[hubM1_4Ctrl] or b3+b5 
+             2: long[hubM2WntPos] := lgWntPos[2]                                                                      
+                long[hubM1_4Ctrl] := long[hubM1_4Ctrl] or b11+b13 
+             3: long[hubM3WntPos] := lgWntPos[3]
+                long[hubM1_4Ctrl] := long[hubM1_4Ctrl] or b19+b21  
+             4: long[hubM4WntPos] := lgWntPos[4]
+                long[hubM1_4Ctrl] := long[hubM1_4Ctrl] or b27+b29   
          
-         byState[i] := 20  
+           byState[i] := 20  
 
-      20:
-         'accelerate till calced speed reached
-         lgActV[i] := lgActV[i] + lgAccPer10ms[i]
-         if lgActV[i] > lgVcalced[i]
-           lgActV[i] := lgVcalced[i]
-         case i
-           1: long[hubM1MaxCount] := 10000/lgActV[i]
-           2: long[hubM2MaxCount] := 10000/lgActV[i]
-           3: long[hubM3MaxCount] := 10000/lgActV[i]
-           4: long[hubM4MaxCount] := 10000/lgActV[i]
+        20:
+           'accelerate till calced speed reached
+           lgActV[i] := lgActV[i] + lgAccPer10ms[i]
+           if lgActV[i] > lgVcalced[i]
+             lgActV[i] := lgVcalced[i]
+           case i
+              1: long[hubM1MaxCount] := 10000/lgActV[i]
+              2: long[hubM2MaxCount] := 10000/lgActV[i]
+              3: long[hubM3MaxCount] := 10000/lgActV[i]
+              4: long[hubM4MaxCount] := 10000/lgActV[i]
 
-        'next step depending on move type      
-        case byMoveType[i]
-           1: if ||(lgActpos[i]-lgWntPos[i]) < lgX2[i] 'trapezoidial (if decelerat distance greater than act-wnt
-              ''byState[i] := 30
-           2: if lgActV[i] == lgVcalced[i]             'triangle (if calced speed reached)
-              ''byState[i] := 30
-           3: ''byState[i] := 30                       'rectangle (no condition)
+           'next step depending on move type      
+           case byMoveType[i]
+             1: if lgX2 > ||(lgActpos[i]-lgWntPos[i])    'trapezoidial (if decelerat distance greater than act-wnt
+                  byState[i] := 30
+             2: if lgActV[i] == lgVcalced[i]             'triangle (if calced speed reached)
+                  byState[i] := 30
+             3: byState[i] := 30                         'rectangle (no condition)
 
-      30:
-        'decelerate
-        lgActV[i] := lgActV[i] - lgAccPer10ms[i]
-        if lgActV[i] < lgVmin[i]
-           lgActV[i] := lgVmin[i]
+        30:'decelerate
+           lgActV[i] := lgActV[i] - lgAccPer10ms[i]
+           if lgActV[i] < lgVmin[i]
+             lgActV[i] := lgVmin[i]
 
-        if lgWntPos==lgActPos
-           byState[i] := 40
+           if lgWntPos==lgActPos
+             byState[i] := 40
            
-      40:'wait for start command
-         IF !xMoveStart[i]
-           xMoveDone[i] := true
-           byState[i] := 0
+        40:'wait for start command
+           IF !xMoveStart[i]
+             xMoveDone[i] := true
+             byState[i] := 0
              
 DAT
 

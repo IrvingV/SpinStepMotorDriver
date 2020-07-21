@@ -539,6 +539,7 @@ M4End                   test    lgM1_4Ctrl,     b26 wz                          
 ''lgDelay                 long  5_000_000       '0,05 sec    f =  10 Hz
 ''lgDelay                 long    500_000       '0,005 sec   f = 100 Hz  
 ''lgDelay                 long     50_000       '0,0005 sec  f =   1 kHz  
+
 lgDelay                 long      5_000       '0,00005 sec
                                                 'Maxcount =2 f = 10   kHz
                                                 'Maxcount =3 f =  6.6 kHz
