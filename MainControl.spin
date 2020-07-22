@@ -43,8 +43,9 @@ VAR
   byte i,j
   long alive
  
-PRI PrnXyDec(x,y,d)
+PRI PrnXyDec(x,y,s,d)
   pc.Position(x,y)
+  pc.Str(s)
   pc.Str(string("> "))
   pc.dec(d)
   pc.Str(string(" <"))
@@ -53,8 +54,9 @@ PRI PrnXyStr(x,y,str)
   pc.Position(x,y)
   pc.Str(str)
     
-PRI PrnXyBool(x,y,b)
+PRI PrnXyBool(x,y,s,b)
   pc.Position(x,y)
+  pc.Str(s)
   if b==true
     pc.Str(string("TRUE "))
   elseif b==false
@@ -87,22 +89,25 @@ PUB Main
     waitcnt(cnt + 1000000)
     ''i:=1
     alive++  
-    PrnXyDec (10, i, motn.Get_c)
+    ''PrnXyDec (1, 1, string("error "),motn.Get_c)
     i:=1
     ''repeat i from 1 to 4
-                              '12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
-        PrnXyStr(1, 0, string("         alive     error     enabled  state type actpos    wntpos    x1        x2        relDist   v calced  v actual"))
-        PrnXyDec (20, i+1, motn.Get_woError)
-        PrnXyDec (40, i+1, motn.Get_byState(i))
-        PrnXyDec (45, i+1, motn.Get_byMoveType(i))
-        PrnXyDec (50, i+1, motn.Get_lgActPos(i))
-        PrnXyDec (60, i+1, motn.Get_lgWntPos(i))
-        PrnXyDec (70, i+1, motn.Get_lgX1(i))
-        PrnXyDec (80, i+1, motn.Get_lgX2(i))
-        PrnXyDec (90, i+1, motn.Get_lgRelDist(i))
-        PrnXyDec (95, i+1, motn.Get_lgAccPer10ms(i))
-        PrnXyDec (100, i+1, motn.Get_lgVcalced(i))
-        PrnXyDec (110, i+1, motn.Get_lgActV(i))
+   
+        PrnXyDec (10, 3, string("error  "),motn.Get_woError)
+        PrnXyDec (30, 3, string("state  "),motn.Get_byState(i))
+        PrnXyDec (50, 3, string("type   "),motn.Get_byMoveType(i))
+        
+        PrnXyDec (10, 5, string("actPos "),motn.Get_lgActPos(i))
+        PrnXyDec (30, 5, string("wntPos "),motn.Get_lgWntPos(i))
+        PrnXyDec (50, 5, string("PosErr "),motn.Get_lgAbsDiff(i))
+        
+        PrnXyDec (10, 7, string("X1     "),motn.Get_lgX1(i))
+        PrnXyDec (30, 7, string("X2     "),motn.Get_lgX2(i))
+        PrnXyDec (50, 7, string("reldist"),motn.Get_lgRelDist(i))
+        
+        PrnXyDec (10, 9, string("acc10ms"),motn.Get_lgAccPer10ms(i))
+        PrnXyDec (30, 9, string("v calcd"),motn.Get_lgVcalced(i))
+        PrnXyDec (50, 9, string("v act  "),motn.Get_lgActV(i))
   
     xKeyPressed := pc.RxCheck
 
