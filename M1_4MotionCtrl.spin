@@ -118,17 +118,15 @@ PUB Reset(x)
   byState[x] := 0
   lgWntPos[x]:=lgActPos[x]
   case x
-    1: long[hubM1WntPos] := lgWntPos[1]
-       long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b5 
-    2: long[hubM2WntPos] := lgWntPos[2]                                                                      
-       long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b13 
-    3: long[hubM3WntPos] := lgWntPos[3]
-       long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b21  
-    4: long[hubM4WntPos] := lgWntPos[4]
-       long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b29   
+    1: long[hubM1WantPos] := lgWntPos[1]
+    2: long[hubM2WantPos] := lgWntPos[2]                                                                      
+    3: long[hubM3WantPos] := lgWntPos[3]
+    4: long[hubM4WantPos] := lgWntPos[4]
   
 
 PRI MotionLoop
+
+  ''long[hubM1_4CtrlSet] := long[hubM1_4CtrlSet] | 1 
   repeat
     waitcnt (cnt + 1000000)        '' 1_000_000 = 0,01 sec)
     c++
@@ -154,17 +152,14 @@ PRI MotionLoop
 
            'set wanted position 
            case i
-             1: long[hubM1WntPos] := lgWntPos[1]
-                long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b5 
-             2: long[hubM2WntPos] := lgWntPos[2]                                                                      
-                long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b13 
-             3: long[hubM3WntPos] := lgWntPos[3]
-                long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b21  
-             4: long[hubM4WntPos] := lgWntPos[4]
-                long[hubM1_4Ctrl] := long[hubM1_4Ctrl] | b29   
+             1: long[hubM1WantPos] := lgWntPos[1]
+             2: long[hubM2WantPos] := lgWntPos[2]                                                                      
+             3: long[hubM3WantPos] := lgWntPos[3]
+             4: long[hubM4WantPos] := lgWntPos[4]
 
           'Set acc per 10 msec
-           lgAccPer10ms[i] := lgAcc[i] / 100 
+           lgAccPer10ms[i] := lgAcc[i] / 100
+           
 
            'Determine type of move
            lgX1[i] := ( lgVmax[i] * lgVmax[i] ) / ( 2 * lgAcc[i] ) 
@@ -222,7 +217,7 @@ PRI MotionLoop
              lgActV[i] := lgVmin[i]
 
            if lgWntPos==lgActPos
-             ''byState[i] := 40
+             byState[i] := 40
              lgActV[i]:=0
            
         40:'wait for start command
@@ -275,10 +270,10 @@ b31                     long $80000000
 
 hubM1_4Ctrl             long $7000
 
-hubM1WntPos             long $7060
-hubM2WntPos             long $7064
-hubM3WntPos             long $7068
-hubM4WntPos             long $706C
+hubM1WantPos            long $7070
+hubM2WantPos            long $7074
+hubM3WantPos            long $7078
+hubM4WantPos            long $707C
 
 hubM1ActPos             long $7020
 hubM2ActPos             long $7024
