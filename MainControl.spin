@@ -42,13 +42,17 @@ VAR
   
   byte i,j
   long alive
+  byte xAuto[5]
+  byte xEnable[5]
+  byte xFw[5]
+  byte xBw[5]
  
 PRI PrnXyDec(x,y,s,d)
   pc.Position(x,y)
   pc.Str(s)
   pc.Str(string("> "))
   pc.dec(d)
-  pc.Str(string(" <"))
+  pc.Str(string(" <     "))
 
 PRI PrnXyStr(x,y,str)
   pc.Position(x,y)
@@ -70,12 +74,12 @@ PUB Main
   stpmtr.Start
   motn.Start
 
-  motn.Set_lgVmax(1,100)
+  motn.Set_lgVmax(1,1000)
   motn.Set_lgVmin(1,10)
   motn.Set_lgAcc(1,100)
   motn.Set_lgDec(1,100)
-  stpmtr.SetAutomode(1,true)   
-  stpmtr.SetEnable(1,true)   
+  motn.Set_Automode(1,true)   
+  motn.Set_Enable(1,true)   
 
   
   ''motn.Set_lgVmax(2,100)
@@ -104,87 +108,82 @@ PUB Main
      ''PrnXyDec (1, 1, string("error "),motn.Get_c)
       i:=1
     ''repeat i from 1 to 4
-{{
-        PrnXyStr( 2,1,string("Commands 1) 0=manual 1=auto"))
-        PrnXyStr(15,2,string("2) 0=disabled 1= enabled"))
-        PrnXyStr(15,3,string("4) jog+"))
-        PrnXyStr(15,4,string("5) jog-"))
-        PrnXyStr(15,5,string("7) set home position 10"))
-        PrnXyStr(15,6,string("9) set wanted position 100"))
-}}
-        PrnXyBool ( 1, 16+i*4, string("auto mode = "),stpmtr.Automode(i))
-        PrnXyBool (31, 16+i*4, string("enabled = "),stpmtr.Enabled(i))
-        PrnXyBool (61, 16+i*4, string("wnt=actPos = "),stpmtr.AtPosition(i))
-        PrnXyBool ( 1, 17+i*4, string("pulsing = "),stpmtr.Pulsing(i))
-        PrnXyBool (31, 17+i*4, string("direction = "),stpmtr.Direction(i))
-        PrnXyDec  ( 1, 18+i*4, string("actual pos = "),stpmtr.ActualPosition(i))
-        PrnXyDec  (31, 18+i*4, string("wanted pos = "),stpmtr.WantedPosition(i))
-        PrnXyDec  (61, 18+i*4, string("MaxCount = "),stpmtr.MaxCount(i))
-   
-        PrnXyDec (10, 3, string("error  "),motn.Get_woError)
-        PrnXyDec (30, 3, string("state  "),motn.Get_byState(i))
-        PrnXyDec (50, 3, string("type   "),motn.Get_byMoveType(i))
-        
-        PrnXyDec (10, 5, string("actPos "),motn.Get_lgActPos(i))
-        PrnXyDec (30, 5, string("wntPos "),motn.Get_lgWntPos(i))
-        PrnXyDec (50, 5, string("PosErr "),motn.Get_lgAbsDiff(i))
-        
-        PrnXyDec (10, 7, string("X1     "),motn.Get_lgX1(i))
-        PrnXyDec (30, 7, string("X2     "),motn.Get_lgX2(i))
-        PrnXyDec (50, 7, string("reldist"),motn.Get_lgRelDist(i))
-        
-        PrnXyDec (10, 9, string("acc10ms"),motn.Get_lgAccPer10ms(i))
-        PrnXyDec (30, 9, string("v calcd"),motn.Get_lgVcalced(i))
-        PrnXyDec (50, 9, string("v act  "),motn.Get_lgActV(i))
-  
-    xKeyPressed := pc.RxCheck
 
+        PrnXyStr( 1,1,string("Commands 1) 0=manual 1=auto"))
+        PrnXyStr(10,2,string("2) 0=disabled 1= enabled"))
+        PrnXyStr(10,3,string("3) jog+"))
+        PrnXyStr(10,4,string("4) jog-"))
+        PrnXyStr(10,5,string("7) set home position 10"))
+        PrnXyStr(10,6,string("9) set wanted position 100"))
+
+        ''PrnXyBool (31, 16+i*4, string("enabled = "),motn.Enabled(i))
+        ''PrnXyBool (61, 16+i*4, string("wnt=actPos = "),motn.AtPosition(i))
+        ''PrnXyBool ( 1, 17+i*4, string("pulsing = "),motn.Pulsing(i))
+        ''PrnXyBool (31, 17+i*4, string("direction = "),motn.Direction(i))
+        ''PrnXyDec  ( 1, 18+i*4, string("actual pos = "),motn.ActualPosition(i))
+        ''PrnXyDec  (31, 18+i*4, string("wanted pos = "),motn.WantedPosition(i))
+        ''PrnXyDec  (61, 18+i*4, string("Speed steps/sec = "),motn.Get_Speed(i))
+   
+        PrnXyBool ( 20, 8, string("auto mode = "),motn.Get_Automode(i))
+
+        PrnXyDec (10, 10, string("actPos "), motn.Get_hubActPos(i))
+        PrnXyDec (30, 10, string("wntPos "), motn.Get_hubWntPos(i))
+        PrnXyDec (50, 10, string("PosErr "), motn.Get_hubActPos(i) - motn.Get_hubWntPos(i) )
+        PrnXyDec (70, 10, string("PosErr "), motn.Get_lgAbsDiff(i))
+        PrnXyDec (90, 10, string("v act  "), motn.Get_Speed(i))
+
+        PrnXyDec (10, 12, string("error  "), motn.Get_woError)
+        PrnXyDec (30, 12, string("state  "), motn.Get_byState(i))
+        PrnXyDec (50, 12, string("type   "), motn.Get_byMoveType(i))
+        
+        PrnXyDec (10, 14, string("X1     "), motn.Get_lgX1(i))
+        PrnXyDec (30, 14, string("X2     "), motn.Get_lgX2(i))
+        PrnXyDec (50, 14, string("reldist"), motn.Get_lgRelDist(i))
+        
+        PrnXyDec (10, 16, string("acc10ms"), motn.Get_lgAccPer10ms(i))
+        PrnXyDec (30, 16, string("v calcd"), motn.Get_lgVcalced(i))
+  
+
+
+    xKeyPressed := pc.RxCheck
+  
     if xKeyPressed == "1"
-       motn.StartRelMove(i,2000)
+       if xAuto[i]
+          motn.Set_AutoMode(i,false)
+          xAuto[i] :=false
+       else
+          motn.Set_Automode(i,true)
+          xAuto[i] := true 
+       
+    if xKeyPressed == "2"
+       if xEnable[i]
+          motn.Set_Enable(i,false)
+          xEnable[i] := false
+       else
+          motn.Set_Enable(i,true)
+          xEnable[i] := true   
+      
+    if xKeyPressed == "3"
+       if xFw[i]
+          motn.Set_JogForward(i,false)
+          xFw[i]:=false
+       else
+          motn.Set_JogBackward(i,false)
+          motn.Set_JogForward(i,true)
+          xFw[i]:=true
+             
+    if xKeyPressed == "4"
+       if xBw[i]   
+          motn.Set_JogBackward(i,false)
+          xBw[i]:=false
+       else
+          motn.Set_JogForward(i,false)
+          motn.Set_JogBackward(i,true)
+          xBw[i]:=true
+
+    if xKeyPressed == "9" and xAuto[i]
+       motn.RelMove(i,20000)
         
     if xKeyPressed == "r"
        motn.Reset(i)
-
-    if xKeyPressed == "3"
-       motn.StartRelMove(i,9)
- 
-
-{{
-       ' Test StepPulsControl
-    if xKeyPressed == "1"
-       if stpmtr.Automode(i)
-          stpmtr.SetAutoMode(i,false)
-       else
-          stpmtr.SetAutomode(i,true)   
-       
-    if xKeyPressed == "2"
-       if stpmtr.Enabled(i)
-          stpmtr.SetEnable(i,false)
-       else
-          stpmtr.SetEnable(i,true)   
-}}        
-    if xKeyPressed == "4"
-       if stpmtr.JogForward(i)
-          stpmtr.SetJogForward(i,false)
-       else
-          stpmtr.SetJogBackward(i,false)
-          stpmtr.SetJogForward(i,true)
-             
-    if xKeyPressed == "5"
-       if stpmtr.JogBackward(i)
-          stpmtr.SetJogBackward(i,false)
-       else
-          stpmtr.SetJogForward(i,false)
-          stpmtr.SetJogBackward(i,true)
-    if xKeyPressed == "7"
-         stpmtr.SetHomePosition(i,10)
-    if xKeyPressed == "9"
-         stpmtr.SetWantedPosition(i,100)
-
-{{    if xKeyPressed == "r"
-       motn.Reset(1)
-
-    if xKeyPressed == "3"
-       motn.StartRelMove(3,9)
-}}
   
