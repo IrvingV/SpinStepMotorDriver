@@ -5,6 +5,9 @@
 '*****************************
 
 CON                                                                           
+  ''_clkmode      = xtal1 + pll16x     
+  ''_xinfreq      = 5_000_000
+
   PC_BAUD       = 115_200
    
 OBJ
@@ -54,6 +57,13 @@ PRI PrnXyDec(x,y,s,d)
   pc.dec(d)
   pc.Str(string(" <     "))
 
+PRI PrnXyHex(x,y,s,d)
+  pc.Position(x,y)
+  pc.Str(s)
+  pc.Str(string("> "))
+  pc.hex(d,8)
+  pc.Str(string(" <"))
+
 PRI PrnXyStr(x,y,str)
   pc.Position(x,y)
   pc.Str(str)
@@ -74,12 +84,12 @@ PUB Main
   stpmtr.Start
   motn.Start
 
-  motn.Set_lgVmax(1,1000)
+  motn.Set_lgVmax(1,100)
   motn.Set_lgVmin(1,10)
   motn.Set_lgAcc(1,100)
   motn.Set_lgDec(1,100)
-  motn.Set_Automode(1,true)   
-  motn.Set_Enable(1,true)   
+''  motn.Set_Automode(1,true)   
+  ''motn.Set_Enable(1,true)   
 
   
   ''motn.Set_lgVmax(2,100)
@@ -142,6 +152,7 @@ PUB Main
         
         PrnXyDec (10, 16, string("acc10ms"), motn.Get_lgAccPer10ms(i))
         PrnXyDec (30, 16, string("v calcd"), motn.Get_lgVcalced(i))
+        PrnXyHex (50, 16, string("read variable"), motn.readvar)'' motn.counter)
   
 
 

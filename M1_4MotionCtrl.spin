@@ -6,8 +6,8 @@
 '********************************************************************************
 
 CON                                                                           
-  _clkmode      = xtal1 + pll16x     
-  _xinfreq      = 5_000_000
+ '' _clkmode      = xtal1 + pll16x     
+  ''_xinfreq      = 5_000_000
   
 VAR
 
@@ -38,6 +38,11 @@ byte    byAuto[5]
 ' Var Out
 byte    xMoveDone[5]
 long c
+
+long startT
+long execT
+ long seconds, dT, T
+
 
 PUB Start
   cognew (MotionLoop, 0)
@@ -232,7 +237,10 @@ PUB ExecuteTime
 
 PUB LoopCount
   return long[hubExecCounter]
-
+  
+PUB readvar
+  return dT
+  
 PUB Direction(x)
   case x
     1: return long[hubM1_4Stat] & b0 == b0  
@@ -298,30 +306,36 @@ PUB Get_Speed (x)
 
 
 PRI MotionLoop
-  lgJogSpeed[1]:=11
-  lgJogSpeed[2]:=12
-  lgJogSpeed[3]:=13
-  lgJogSpeed[4]:=14
 
+  lgJogSpeed[1]                 := 11
+  lgJogSpeed[2]                 := 12
+  lgJogSpeed[3]                 := 13
+  lgJogSpeed[4]                 := 14
+
+  dT := clkfreq
+  T := cnt
+  
   repeat
-    waitcnt (cnt + 1000000)        '' 1_000_000 = 0,01 sec)
+    T += dT
+    waitcnt(T)
+    seconds ++
+ 
+    startT:=cnt
+
     c++
     lgActPos[1]:=long[hubM1Actpos] 
     lgActPos[2]:=long[hubM2Actpos] 
     lgActPos[3]:=long[hubM3Actpos] 
     lgActPos[4]:=long[hubM4Actpos] 
-
-
+ 
     i:=1
-
     ''repeat i from 1 to 4  
-
 
       byAuto[i] := Get_AutoMode(i)
     
       case byState[i]
 
-        0: 'wait for start command
+         0: 'wait for start command
           lgActV[i]:=0 
           IF xMoveStart[i]
             xMoveStart[i] := false
@@ -341,7 +355,7 @@ PRI MotionLoop
            lgAccPer10ms[i] := lgAcc[i] / 100
            
 
-           'Determine type of move
+           'Determine type of move and Vmax calculated
            lgX1[i] := ( lgVmax[i] * lgVmax[i] ) / ( 2 * lgAcc[i] ) 
            lgX2[i] := ( lgVmax[i] * lgVmax[i] ) / ( 2 * lgDec[i] )
            lgDx[i] := lgX1[i] + lgX2[i]
@@ -377,31 +391,31 @@ PRI MotionLoop
 
         20:
            'accelerate till calced speed reached
-           lgActV[i] := lgActV[i] + lgAccPer10ms[i]
-           if lgActV[i] > lgVcalced[i]
+          lgActV[i] := lgActV[i] + lgAccPer10ms[i]
+          if lgActV[i] > lgVcalced[i]
              lgActV[i] := lgVcalced[i]
 
-           lgAbsDiff[i] := ||(lgWntPos[i] - lgActpos[i]) 
+          lgAbsDiff[i] := ||(lgWntPos[i] - lgActpos[i]) 
 
            'next step depending on move type      
-           case byMoveType[i]
-             1: if lgX2[i] > lgAbsDiff[i]               'trapezoidial (if decelerat distance greater than act-wnt
-                  byState[i] := 30                      
-             2: if lgActV[i] == lgVcalced[i]            'triangle (if calced speed reached)
-                  byState[i] := 30
-             3: byState[i] := 30                        'rectangle (no condition)
+          case byMoveType[i]
+            1: if lgX2[i] > lgAbsDiff[i]               'trapezoidial (if decelerat distance greater than act-wnt
+                 byState[i] := 30                      
+            2: if lgActV[i] == lgVcalced[i]            'triangle (if calced speed reached)
+                 byState[i] := 30
+            3: byState[i] := 30                        'rectangle (no condition)
 
         30:'decelerate
-           lgActV[i] := lgActV[i] - lgAccPer10ms[i]
-           if lgActV[i] < lgVmin[i]
-             lgActV[i] := lgVmin[i]
+          lgActV[i] := lgActV[i] - lgAccPer10ms[i]
+          if lgActV[i] < lgVmin[i]
+            lgActV[i] := lgVmin[i]
 
-           if lgWntPos==lgActPos
-             byState[i] := 40
-             lgActV[i]:=0
+          if lgWntPos==lgActPos
+            byState[i] := 40
+            lgActV[i]:=0
            
         40:'wait for start command
-           IF !xMoveStart[i]
+          IF !xMoveStart[i]
              xMoveDone[i] := true
              byState[i] := 0
 
@@ -417,6 +431,8 @@ PRI MotionLoop
           2: long[hubM2MaxCount] := 20000/lgJogSpeed[2]
           3: long[hubM3MaxCount] := 20000/lgJogSpeed[3]
           4: long[hubM4MaxCount] := 20000/lgJogSpeed[4]
+
+    execT := cnt - startT       
                  
 DAT
 
