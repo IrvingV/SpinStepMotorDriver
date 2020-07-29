@@ -38,11 +38,11 @@ byte    byAuto[5]
 ' Var Out
 byte    xMoveDone[5]
 long c
-
+long lgTime
 long startT
 long execT
- long seconds, dT, T
-
+long seconds, dT, T
+long lgExecCounter
 
 PUB Start
   cognew (MotionLoop, 0)
@@ -91,7 +91,7 @@ PUB Get_lgAccPer10ms(x)
   return lgAccPer10ms[x]
 
 PUB Get_c
-  return c
+  return dT
 
 PUB Get_lgAbsDiff(x)
   return lgAbsDiff[x]
@@ -235,8 +235,8 @@ PUB Set_Speed (x, speed)
 PUB ExecuteTime
   return long[hubExecTime]
 
-PUB LoopCount
-  return long[hubExecCounter]
+PUB Cycles
+  return lgExecCounter/100
   
 PUB readvar
   return dT
@@ -312,13 +312,11 @@ PRI MotionLoop
   lgJogSpeed[3]                 := 13
   lgJogSpeed[4]                 := 14
 
-  dT := clkfreq
-  T := cnt
+  lgTime :=cnt
   
   repeat
-    T += dT
-    waitcnt(T)
-    seconds ++
+    waitcnt(lgTime += 1000000)
+    lgExecCounter++
  
     startT:=cnt
 

@@ -61,7 +61,7 @@ PRI PrnXyHex(x,y,s,d)
   pc.Position(x,y)
   pc.Str(s)
   pc.Str(string("> "))
-  pc.hex(d,8)
+  pc.dec(d)
   pc.Str(string(" <"))
 
 PRI PrnXyStr(x,y,str)
@@ -152,7 +152,8 @@ PUB Main
         
         PrnXyDec (10, 16, string("acc10ms"), motn.Get_lgAccPer10ms(i))
         PrnXyDec (30, 16, string("v calcd"), motn.Get_lgVcalced(i))
-        PrnXyHex (50, 16, string("read variable"), motn.readvar)'' motn.counter)
+        PrnXyHex (50, 16, string("motn "), motn.cycles)'' motn.counter)
+        PrnXyHex (70, 16, string("stpmtr "), clkfreq )''stpmtr.cycles)''motn.readvar)'' motn.counter)
   
 
 
