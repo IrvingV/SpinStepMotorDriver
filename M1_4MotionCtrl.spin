@@ -78,9 +78,6 @@ PUB Get_lgX2(x)
 PUB Get_lgVcalced(x)
   return lgVcalced[x]
 
-PUB Get_lgRelDist(x)
-  return lgRelDist[x]
-
 PUB Get_Done(x)
   return xMoveDone[x]
 
@@ -315,7 +312,7 @@ PRI MotionLoop
   lgTime :=cnt
   
   repeat
-    waitcnt(lgTime += 1000000)
+    waitcnt(lgTime += 1000000*5/6)
     lgExecCounter++
  
     startT:=cnt
@@ -408,7 +405,7 @@ PRI MotionLoop
           if lgActV[i] < lgVmin[i]
             lgActV[i] := lgVmin[i]
 
-          if lgWntPos==lgActPos
+          if lgWntPos[i]==lgActPos[i]
             byState[i] := 40
             lgActV[i]:=0
            

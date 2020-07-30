@@ -84,10 +84,10 @@ PUB Main
   stpmtr.Start
   motn.Start
 
-  motn.Set_lgVmax(1,100)
+  motn.Set_lgVmax(1,8000)
   motn.Set_lgVmin(1,10)
-  motn.Set_lgAcc(1,100)
-  motn.Set_lgDec(1,100)
+  motn.Set_lgAcc(1,100000)
+  motn.Set_lgDec(1,100000)
 ''  motn.Set_Automode(1,true)   
   ''motn.Set_Enable(1,true)   
 
@@ -139,21 +139,21 @@ PUB Main
         PrnXyDec (10, 10, string("actPos "), motn.Get_hubActPos(i))
         PrnXyDec (30, 10, string("wntPos "), motn.Get_hubWntPos(i))
         PrnXyDec (50, 10, string("PosErr "), motn.Get_hubActPos(i) - motn.Get_hubWntPos(i) )
-        PrnXyDec (70, 10, string("PosErr "), motn.Get_lgAbsDiff(i))
-        PrnXyDec (90, 10, string("v act  "), motn.Get_Speed(i))
+        PrnXyDec (70, 10, string("v act  "), motn.Get_Speed(i))
 
-        PrnXyDec (10, 12, string("error  "), motn.Get_woError)
-        PrnXyDec (30, 12, string("state  "), motn.Get_byState(i))
-        PrnXyDec (50, 12, string("type   "), motn.Get_byMoveType(i))
+        PrnXyDec (70, 11, string("v calcd"), motn.Get_lgVcalced(i))
+
+        PrnXyDec (70, 12, string("ActV   "), motn.Get_lgActV(i))
+        PrnXyDec (70, 13, string("MaxCnt "), stpmtr.MaxCount)
+        ''PrnXyDec (30, 12, string("state  "), motn.Get_byState(i))
+        ''PrnXyDec (50, 12, string("type   "), motn.Get_byMoveType(i))
         
-        PrnXyDec (10, 14, string("X1     "), motn.Get_lgX1(i))
-        PrnXyDec (30, 14, string("X2     "), motn.Get_lgX2(i))
-        PrnXyDec (50, 14, string("reldist"), motn.Get_lgRelDist(i))
-        
-        PrnXyDec (10, 16, string("acc10ms"), motn.Get_lgAccPer10ms(i))
-        PrnXyDec (30, 16, string("v calcd"), motn.Get_lgVcalced(i))
-        PrnXyHex (50, 16, string("motn "), motn.cycles)'' motn.counter)
-        PrnXyHex (70, 16, string("stpmtr "), clkfreq )''stpmtr.cycles)''motn.readvar)'' motn.counter)
+        ''PrnXyDec (10, 14, string("X1     "), motn.Get_lgX1(i))
+        ''PrnXyDec (30, 14, string("X2     "), motn.Get_lgX2(i))
+       
+        ''PrnXyDec (10, 16, string("acc10ms"), motn.Get_lgAccPer10ms(i))
+        ''PrnXyHex (50, 16, string("motn "), motn.cycles)'' motn.counter)
+        ''PrnXyHex (70, 16, string("stpmtr "), stpmtr.cycles)''motn.readvar)
   
 
 
@@ -194,7 +194,7 @@ PUB Main
           xBw[i]:=true
 
     if xKeyPressed == "9" and xAuto[i]
-       motn.RelMove(i,20000)
+       motn.RelMove(i,8000)
         
     if xKeyPressed == "r"
        motn.Reset(i)
