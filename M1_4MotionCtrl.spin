@@ -310,7 +310,7 @@ PRI MotionLoop
   lgJogSpeed[4]                 := 14
 
   lgTime :=cnt
-  
+  long[$5008]:= 3
   repeat
     waitcnt(lgTime += 1000000*5/6)
     lgExecCounter++
