@@ -5,8 +5,8 @@
 '*                                                                              *
 '********************************************************************************
 
-CON                                                                           
- '' _clkmode      = xtal1 + pll16x     
+''CON                                                                           
+  ''_clkmode      = xtal1 + pll16x     
   ''_xinfreq      = 5_000_000
   
 VAR
@@ -310,12 +310,12 @@ PRI MotionLoop
   lgJogSpeed[4]                 := 14
 
   lgTime :=cnt
-  long[$5008]:= 3
   repeat
     waitcnt(lgTime += 1000000*5/6)
     lgExecCounter++
  
     startT:=cnt
+    long[$5008]:= cnt
 
     c++
     lgActPos[1]:=long[hubM1Actpos] 

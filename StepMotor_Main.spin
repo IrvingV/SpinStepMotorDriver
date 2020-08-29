@@ -11,20 +11,19 @@ VAR
   
 OBJ
 
-  usbcomm       : "CommWithJava"
+  usbcomm       : "RwHubMemory"
   ''mc            : "MainControl"  
   stpmtr        : "M1_4StepPulsCtrl"
-  motn          : "M1_4MotionCtrl"
+  ''motn          : "M1_4MotionCtrl"
 
 
 PUB start 
 
   usbcomm.Start
 
-
   ''mc.Start
-   stpmtr.Start
-  motn.Start
+  stpmtr.Start
+  ''motn.Start
 
 
   ''motn.Set_lgVmax(1,8000)

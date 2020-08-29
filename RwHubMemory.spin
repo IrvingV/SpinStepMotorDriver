@@ -5,8 +5,8 @@
 '*****************************
 
 CON                                                                           
-  _clkmode      = xtal1 + pll16x     
-  _xinfreq      = 5_000_000
+  ''_clkmode      = xtal1 + pll16x     
+  ''_xinfreq      = 5_000_000
 
   PC_BAUD       = 115_200
   LF            = 10
@@ -15,8 +15,8 @@ CON
    
 OBJ
   pc            : "Parallax Serial Terminal"
- '' stpmtr        : "M1_4StepPulsCtrl"
-  ''motn          : "M1_4MotionCtrl"
+  ''stpmtr        : "M1_4StepPulsCtrl"
+  ''mtn           : "M1_4MotionCtrl"
 
 VAR
   byte xKeyPressed
@@ -39,17 +39,18 @@ VAR
 PUB Start
 
   pc.Start(PC_BAUD)
+  ''stpmtr.Start
+  ''mtn.Start
 
- '' stpmtr.Start
- '' motn.Start
   
+
+
   pc.clear
   pc.char(">")
-  long[$5000] := 1
 
   repeat 
     xKeyPressed := pc.CharIn
-
+    long[$7800]:= cnt
     if xkeyPressed
       byCmd[byPntr] := xKeyPressed
       byPntr++
