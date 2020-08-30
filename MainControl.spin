@@ -4,14 +4,8 @@
 '*  Author: Irving Verijdt   *
 '*****************************
 
-CON                                                                           
-  ''_clkmode      = xtal1 + pll16x     
-  ''_xinfreq      = 5_000_000
-
-  PC_BAUD       = 115_200
    
 OBJ
-  stpmtr        : "M1_4StepPulsCtrl"
   motn          : "M1_4MotionCtrl"
 
 VAR
@@ -50,16 +44,15 @@ VAR
  
 
 
-PUB Main
+PUB Start
 
-  stpmtr.Start
+
   motn.Start
-  long[$5004] := 2
 
-  motn.Set_lgVmax(1,8000)
-  motn.Set_lgVmin(1,10)
-  motn.Set_lgAcc(1,100000)
-  motn.Set_lgDec(1,100000)
+  ''motn.Set_lgVmax(1,8000)
+  ''motn.Set_lgVmin(1,10)
+  ''motn.Set_lgAcc(1,100000)
+  ''motn.Set_lgDec(1,100000)
 ''  motn.Set_Automode(1,true)   
   ''motn.Set_Enable(1,true)   
 

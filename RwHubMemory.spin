@@ -8,17 +8,17 @@ CON
   ''_clkmode      = xtal1 + pll16x     
   ''_xinfreq      = 5_000_000
 
-  PC_BAUD       = 115_200
-  LF            = 10
+  BaudRate      = 115_200
   CR            = 13
+  LF            = 10
   ESC           = 27
-   
+
 OBJ
   pc            : "Parallax Serial Terminal"
-  ''stpmtr        : "M1_4StepPulsCtrl"
-  ''mtn           : "M1_4MotionCtrl"
 
 VAR
+  long Stack[8]
+  long    cogon, cog
   byte xKeyPressed
   byte xParseError
   byte byCmd[20]
@@ -35,16 +35,15 @@ VAR
   long Digit6
   long Digit7
   byte i
-  byte cntEscapes 
-PUB Start
+  byte cntEscapes
 
-  pc.Start(PC_BAUD)
-  ''stpmtr.Start
-  ''mtn.Start
-
-  
-
-
+PUB start
+  pc.Start(BaudRate)
+  ''waitcnt(clkfreq + cnt)                                'Wait
+  ''cognew(Comm,@Stack)
+ 
+''PUB Comm
+  ''waitcnt(2*clkfreq + cnt)                                'Wait 2 second for PST
   pc.clear
   pc.char(">")
 

@@ -9,7 +9,12 @@
   ''_clkmode      = xtal1 + pll16x     
   ''_xinfreq      = 5_000_000
   
+OBJ
+
 VAR
+
+long    dummyStack[8] 
+long    cogon, cog
 
 ' Var in
 byte    xMoveStart[5]
@@ -43,9 +48,17 @@ long startT
 long execT
 long seconds, dT, T
 long lgExecCounter
+ 
+PUB start(recordptr) : okay
+  stop
+  okay := cogon := (cog := cognew(MotionLoop,recordptr)) > 0
+ 
+PUB stop
+  if cogon~
+    cogstop(cog)
 
-PUB Start
-  cognew (MotionLoop, 0)
+''PUB Start
+  ''cognew (@MotionLoop, @dummyStack)
 
 'Getters
 
@@ -315,7 +328,7 @@ PRI MotionLoop
     lgExecCounter++
  
     startT:=cnt
-    long[$5008]:= cnt
+    long[$7808]:= cnt
 
     c++
     lgActPos[1]:=long[hubM1Actpos] 
