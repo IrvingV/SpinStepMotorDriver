@@ -1,3 +1,7 @@
+'**********************************************************
+'***  File name   : StepMotor_Main.spin                 ***
+'***  Author      : Irving Verijdt                      ***
+'**********************************************************
 
 CON
   _clkmode      = xtal1 + pll16x     
@@ -5,12 +9,12 @@ CON
 
 
 OBJ
-  usbcomm       : "RwHubMemory"
-  ''stpmtr        : "M1_4StepPulsCtrl"
-  ''motn          : "M1_4MotionCtrl"
+  comm          : "RwHubMemory"
+  stpmtr        : "M1_4StepPulsCtrl"
+  mtn           : "M1_4MotionCtrl"
 
 PUB start 
-  usbcomm.start
-  ''stpmtr.Start(0)
-  ''motn.Start(0)
+  comm    .start
+  stpmtr  .start
+  mtn     .start
                 

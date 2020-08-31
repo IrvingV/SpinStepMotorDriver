@@ -5,8 +5,8 @@
 '*****************************
 
 CON                                                                           
-  ''_clkmode      = xtal1 + pll16x     
-  ''_xinfreq      = 5_000_000
+  _clkmode      = xtal1 + pll16x     
+  _xinfreq      = 5_000_000
 
   BaudRate      = 115_200
   CR            = 13
@@ -17,13 +17,12 @@ OBJ
   pc            : "Parallax Serial Terminal"
 
 VAR
-  long Stack[8]
-  long    cogon, cog
   byte xKeyPressed
   byte xParseError
   byte byCmd[20]
   byte byPntr
   byte xRL,xRW,xRB,xWL,xWW,xWB
+  long stack[100]
   long lgHubAddress
   long lgValue
   long Digit0
@@ -38,12 +37,12 @@ VAR
   byte cntEscapes
 
 PUB start
-  pc.Start(BaudRate)
-  ''waitcnt(clkfreq + cnt)                                'Wait
-  ''cognew(Comm,@Stack)
+  cognew(begin,@stack)
  
-''PUB Comm
-  ''waitcnt(2*clkfreq + cnt)                                'Wait 2 second for PST
+PRI begin
+
+  pc    .start(BaudRate)
+
   pc.clear
   pc.char(">")
 

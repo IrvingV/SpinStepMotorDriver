@@ -5,15 +5,16 @@
 '*                                                                              *
 '********************************************************************************
 
-''CON                                                                           
-  ''_clkmode      = xtal1 + pll16x     
-  ''_xinfreq      = 5_000_000
+CON
+  _clkmode      = xtal1 + pll16x     
+  _xinfreq      = 5_000_000
+
   
 OBJ
 
 VAR
 
-long    dummyStack[8] 
+long    Stack[50] 
 long    cogon, cog
 
 ' Var in
@@ -49,16 +50,10 @@ long execT
 long seconds, dT, T
 long lgExecCounter
  
-PUB start(recordptr) : okay
-  stop
-  okay := cogon := (cog := cognew(MotionLoop,recordptr)) > 0
- 
-PUB stop
-  if cogon~
-    cogstop(cog)
 
-''PUB Start
-  ''cognew (@MotionLoop, @dummyStack)
+PUB start
+  longfill(@Stack, 0, 50)
+  cognew (MotionLoop, @Stack)
 
 'Getters
 
