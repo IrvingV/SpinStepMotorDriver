@@ -48,7 +48,7 @@ PRI begin
 
   repeat 
     xKeyPressed := pc.CharIn
-    long[$7800]:= cnt
+
     if xkeyPressed
       byCmd[byPntr] := xKeyPressed
       byPntr++
