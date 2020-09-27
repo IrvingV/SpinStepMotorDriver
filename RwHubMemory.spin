@@ -1,6 +1,6 @@
 '***********************************************************
 '***  Raspberry pi / Propellor / ioboard / servo control ***
-'***********************************************************
+'*****************************
 '*  Author: Irving Verijdt   *
 '*****************************
 
@@ -8,6 +8,8 @@ CON
   _clkmode      = xtal1 + pll16x     
   _xinfreq      = 5_000_000
 
+  Version       = "A"          'A = First release
+  
   BaudRate      = 115_200
   CR            = 13
   LF            = 10
@@ -36,12 +38,12 @@ VAR
   byte i
   byte cntEscapes
 
-PUB start
-  cognew(begin,@stack)
+PUB start(RxdPin, TxdPin)
+  cognew(begin(RxdPin, TxdPin), @stack)
  
-PRI begin
+PRI begin(RxdPin, TxdPin)
 
-  pc    .start(BaudRate)
+  pc    .start(BaudRate,RxdPin, TxdPin)
 
   pc.clear
   pc.char(">")
@@ -210,19 +212,26 @@ PUB Escape
 
 PUB Help
   pc.clear
-  pc.str(string("    *****     Propeller Read & Write HUB adresses    *****    (IVE 260158)"))
+  pc.str(string("---------------------------------------------------------------------------------"))
+  CRLF
+  pc.str(string("    *****     Propeller Read & Write HUB adresses    ***** (IVE 260158) Version "))
+  pc.str(string(Version))
   CRLF
   pc.str(string("    Read  Long/Word/Byte   > RL AAAA,          RW AAAA,      RB AAAA"))
   CRLF
   pc.str(string("    Write Long/Word/Byte   > WL AAAA VVVVVVVV, WW AAAA VVVV, WB AAAA VV"))
   CRLF
-  pc.str(string("                                AAAA = HUB address (Hex)"))
+  pc.str(string("                                AAAA = HUB address (Hex value)"))
   CRLF
-  pc.str(string("                                VV.. = Value       (Hex)"))
+  pc.str(string("                                VV.. = Value       (Hex value)"))
+  CRLF
+  pc.str(string("                                Hex value with capital letters"))
   CRLF
   pc.str(string("     ?  = clear screen and displays help"))
   CRLF
   pc.str(string("    ESC = abort command"))
+  CRLF
+  pc.str(string("---------------------------------------------------------------------------------"))
   CRLF
        
 PUB CRLF

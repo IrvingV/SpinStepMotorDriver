@@ -9,12 +9,12 @@ CON
    
 OBJ
   usbcomm       : "RwHubMemory"
-  ''stpmtr        : "M1_4StepPulsCtrl"
-  ''motn          : "M1_4MotionCtrl"
+  stpmtr        : "M1_4StepPulsCtrl"
+  motn          : "M1_4MotionCtrl"
 
 PUB Start
 
-  usbcomm.start
-  ''stpmtr.start(0)
-  ''motn.start(0)
+  usbcomm.start(14,15)          'start(RxdPin,TxdPin) 115200 Bd, 8, N, 1
+  stpmtr.start
+  motn.start
   
