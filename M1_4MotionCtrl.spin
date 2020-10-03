@@ -156,22 +156,33 @@ PRI MotionLoop
 
 
     if byte[$4000] == 1
-      long[$4010]:= byte[$4000]
+      stpmtr.Set_Jog (1, false, false)
+      stpmtr.Set_Auto(1, true)
 
     if byte[$4000] == 2
-      long[$4010]:= byte[$4000]
+      stpmtr.Set_Enable(1, false)
+      stpmtr.Set_Auto(1, false)
 
-    if byte[$4000] == 4
-      long[$4010]:= byte[$4000]
+
+    if byte[$4000] == 4 and stpmtr.Get_AutoMode(1)
+      stpmtr.Set_Enable(1, true)
 
     if byte[$4000] == 8
-      long[$4010]:= byte[$4000]
+      stpmtr.Set_Enable(1, false)
 
-    if byte[$4000] == 16
-      long[$4010]:= byte[$4000]
+
+    if byte[$4001] == 16 and NOT stpmtr.Get_AutoMode(1)
+      stpmtr.Set_Jog (1, true, false)
+
+    if byte[$4001] == 32 and NOT stpmtr.Get_AutoMode(1)
+      stpmtr.Set_Jog (1, false, true)
+
+    if byte[$4001] == 64
+      stpmtr.Set_Jog (1, false, false)
 
 
     byte[$4000] := 0
+    byte[$4001] := 0
 
 
 
