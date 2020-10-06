@@ -121,7 +121,7 @@ PUB Reset_woError
 PUB Reset(x)
   byState[x] := 0
   lgWntPos[x]:=lgActPos[x]
-  stpmtr.Set_WntPos(x,lgWntPos[x])
+  stpmtr.Set_WantPos(x,lgWntPos[x])
   
 PUB Set_AutoMode(x, Auto)
 
@@ -155,36 +155,60 @@ PRI MotionLoop
     long[$7808]:= cnt
 
 
-    if byte[$4000] == 1
+    if byte[$4000] == b0
+      byte[$4000] := byte[$4000] & !b0
+      byte[$4002] := 1 
       stpmtr.Set_Jog (1, false, false)
       stpmtr.Set_Auto(1, true)
 
-    if byte[$4000] == 2
+    if byte[$4000] == b1
+      byte[$4000] := byte[$4000] & !b1
+      byte[$4002] := 2 
       stpmtr.Set_Enable(1, false)
       stpmtr.Set_Auto(1, false)
 
 
-    if byte[$4000] == 4 and stpmtr.Get_AutoMode(1)
+    if byte[$4000] == b2 and stpmtr.Get_AutoMode(1)
+      byte[$4000] := byte[$4000] & !b2
+      byte[$4002] := 3 
       stpmtr.Set_Enable(1, true)
 
-    if byte[$4000] == 8
+    if byte[$4000] == b3
+      byte[$4000] := byte[$4000] & !b3
+      byte[$4002] := 4 
       stpmtr.Set_Enable(1, false)
 
 
-    if byte[$4001] == 16 and NOT stpmtr.Get_AutoMode(1)
+    if byte[$4000] == b4 and stpmtr.Get_AutoMode(1)
+      byte[$4000] := byte[$4000] & !b4
+      byte[$4002] := 5 
+      stpmtr.Set_HomePos(1, long[$4004])
+
+    if byte[$4000] == b5 and stpmtr.Get_AutoMode(1)
+      byte[$4000] := byte[$4000] & !b5
+      byte[$4002] := 6 
+      stpmtr.Set_WantPos(1, long[$4008])
+
+    if byte[$4001] == b4 and NOT stpmtr.Get_AutoMode(1)
+      byte[$4001] := byte[$4000] & !b4
+      byte[$4002] := 7 
       stpmtr.Set_Jog (1, true, false)
 
-    if byte[$4001] == 32 and NOT stpmtr.Get_AutoMode(1)
+    if byte[$4001] == b5 and NOT stpmtr.Get_AutoMode(1)
+      byte[$4001] := byte[$4001] & !b5
+      byte[$4002] := 8 
       stpmtr.Set_Jog (1, false, true)
 
-    if byte[$4001] == 64
+    if byte[$4001] == b6
+      byte[$4001] := byte[$4001] & !b6
+      byte[$4002] := 9 
       stpmtr.Set_Jog (1, false, false)
 
-
-    byte[$4000] := 0
-    byte[$4001] := 0
-
-
+ 
+    if byte[$4000] == b6
+      byte[$4000] := byte[$4000] & !b6
+      byte[$4002] := 10 
+      lgJogSpeed[1]:=long[$400C]
 
 
     
@@ -207,10 +231,10 @@ PRI MotionLoop
 
            'set wanted position 
            case i
-             1: stpmtr.Set_WntPos(1,lgWntPos[1])
-             2: stpmtr.Set_WntPos(2,lgWntPos[2])
-             3: stpmtr.Set_WntPos(3,lgWntPos[3])
-             4: stpmtr.Set_WntPos(4,lgWntPos[4])
+             1: stpmtr.Set_WantPos(1,lgWntPos[1])
+             2: stpmtr.Set_WantPos(2,lgWntPos[2])
+             3: stpmtr.Set_WantPos(3,lgWntPos[3])
+             4: stpmtr.Set_WantPos(4,lgWntPos[4])
 
           'Set acc per 10 msec
            lgAccPer10ms[i] := lgAcc[i] / 100
@@ -286,4 +310,12 @@ PRI MotionLoop
                  
 DAT
 
+b0                      long $1
+b1                      long $2
+b2                      long $4
+b3                      long $8
+b4                      long $10
+b5                      long $20
+b6                      long $40
+b7                      long $80
       
